@@ -19,7 +19,7 @@ export default function ProfileFormPage({ initialData, errors }: ProfileFormPage
   );
   const { toast } = useToast();
   const topRef = useRef<HTMLDivElement>(null);
-  console.log(formState)
+  
 
   useEffect(() => {
     if (formState.errors && Object.keys(formState.errors).length > 0) {
@@ -36,7 +36,7 @@ export default function ProfileFormPage({ initialData, errors }: ProfileFormPage
     }
   }, [formState.errors, toast]);
 
-  // Force remount on values change so defaultValue updates
+  
   const formKey = JSON.stringify(formState.values);
 
   return (
@@ -78,22 +78,23 @@ export default function ProfileFormPage({ initialData, errors }: ProfileFormPage
         />
 
         <SkillsInput name ="skills" defaultSkills={formState.values?.skills || []} />
+        
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Input
             name="linkedin"
             placeholder="LinkedIn URL"
-            defaultValue={formState.values?.linkedin}
+            defaultValue={formState.values?.personal_profiles?.linkedin}
           />
           <Input
             name="github"
             placeholder="GitHub URL"
-            defaultValue={formState.values?.github}
+            defaultValue={formState.values?.personal_profiles?.github}
           />
           <Input
             name="website"
             placeholder="Personal Website"
-            defaultValue={formState.values?.website}
+            defaultValue={formState.values?.personal_profiles?.website}
           />
         </div>
 

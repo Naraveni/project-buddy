@@ -28,7 +28,7 @@ const features = [
 
 const welcome: React.FC = () => {
   return (
-    <section className="bg-gradient-to-b from-black via-black to-indigo-950 text-white min-h-screen px-6 py-12 flex flex-col items-center justify-center">
+    <section className="bg-gradient-to-b from-black via-black to-indigo-950 text-white h-[calc(100vh-44px)] px-6 py-12 flex flex-col items-center justify-center">
         <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#1e3a8a_0%,transparent_30%)]" />
         
       <div className="flex flex-col-reverse md:flex-row items-center justify-between gap-10 max-w-6xl w-full">

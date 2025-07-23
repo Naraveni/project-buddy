@@ -1,9 +1,12 @@
 export interface Experience {
     employer: string;
     role: string;
-    startDate: string;  // ISO date string
-    endDate: string;    // ISO date string
+    startDate: string;
+    endDate: string;
     description: string;
+    start_date?: string;
+    end_date?: string;
+
   }
   
   /**
@@ -12,10 +15,32 @@ export interface Experience {
   export interface Education {
     university: string;
     major: string;
-    startDate: string;  // ISO date string
-    endDate: string;    // ISO date string
+    startDate: string;
+    endDate: string;
     description: string;
+    start_date?: string;
+    end_date?: string;
   }
+
+  export interface ChatMessage {
+  id: string;
+  text: string;
+  sender_id: string;
+  chat_id: string;
+  created_at: string;
+}
+
+export interface Chat {
+  id: string;
+  user_id: string;
+  user_owner_id: string;
+  post_id: string | null;
+  created_at: string;
+  chat_type: 'incoming' | 'outgoing';
+  name: string;
+  messages: ChatMessage[];
+  unread_count?: number;
+}
 
 
 
@@ -78,9 +103,12 @@ export interface ProjectFormState {
     is_public?: boolean;
     category?: string;
     image_url?: string;
+    id? : string;
     skills?: { id: string; name: string }[] | string[];
   };
 }
+
+
 
 export interface ProjectFormPageProps {
   initialData?: Record<string, any>;
@@ -103,4 +131,63 @@ export type Project = {
   website_url?: string;
   status: string;
   skills: Skill[];
+  display_image_url? :string
 };
+
+// types.ts or wherever you manage types
+
+export interface PostingFormValues {
+  id?: string;
+  project_id: string;
+  role_name: string;
+  description: string;
+  start_date: string;
+  end_date: string;
+  hours_required: number;
+  mode_of_meeting: string;
+  status: string;
+  application_deadline?: string;
+  skills: { id: string; name: string }[];
+}
+
+export interface PostingFormState {
+  values: Partial<PostingFormValues>;
+  errors?: Record<string, string[]>;
+}
+
+export interface PostingFormPageProps {
+  initialData?: Partial<PostingFormValues>;
+  errors?: Record<string, string[]>;
+  projects: { id: string; name: string }[];
+}
+
+
+export interface Posting {
+  id: string;
+  user_id: string;
+  project_id: string;
+  role_name: string;
+  description: string;
+  start_date: string; // ISO date string
+  end_date: string;   // ISO date string
+  hours_required: number;
+  mode_of_meeting: 'remote' | 'in-person' | 'hybrid';
+  status: 'open' | 'closed' | 'paused';
+  application_deadline?: string | null;
+  created_at: string;
+  updated_at: string;
+  skills: {
+    id: string;
+    name: string;
+  }[];
+}
+
+
+export interface Message {
+  id?: string;
+  text?: string;
+  sender_id?: string;
+  created_at?: string;
+  chat_id?: string;
+}
+

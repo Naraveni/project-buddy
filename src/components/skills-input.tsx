@@ -26,7 +26,7 @@ export default function SkillsInput({
   });
 
 useEffect(() => {
-  console.log("Incoming defaultSkills", defaultSkills);
+  console.log('Default skills updated:', defaultSkills);
   setFieldState((prev) => ({
     ...prev,
     selected: defaultSkills,
@@ -100,7 +100,7 @@ useEffect(() => {
         <div className="flex flex-wrap gap-1 border border-gray-300 p-3 rounded-md bg-white shadow-sm dark:bg-black dark:border-gray-600">
           {fieldState.selected.map((s) => (
             <Badge
-              key={s.id}
+              key={`${s.id}-${s.name}`}
               variant="secondary"
               onClick={() => removeSkill(s.id)}
               className="cursor-pointer"
@@ -122,7 +122,7 @@ useEffect(() => {
           <CommandList>
             <CommandGroup>
               {suggestions.map((skill) => (
-                <CommandItem key={skill.id} onSelect={() => addSkill(skill)}>
+                <CommandItem key={`${skill.id}-${skill.name}`} onSelect={() => addSkill(skill)}>
                   {formatSkill(skill.name)}
                 </CommandItem>
               ))}
@@ -134,7 +134,7 @@ useEffect(() => {
       <input
   type="hidden"
   name={name}
-  value={JSON.stringify(fieldState.selected.map(s => ({
+  value={JSON.stringify(fieldState?.selected?.map(s => ({
     id: s.id,
     name: s.name,
 })))}

@@ -2,8 +2,9 @@
 import { profileSchema } from "@/lib/validations/profile";
 import { createSupabaseServerClient } from "@/utils/supabase/server-client";
 import { redirect } from "next/navigation";
-import { ProfileFormState } from "@/lib/types";
+import { ProfileFormState, Skill } from "@/lib/types";
 import { formatZodErrors } from "@/utils/format-zod-error";
+
 
 function extractNestedArray(formData: FormData, keyPrefix: string) {
   const entries = Array.from(formData.entries()).filter(([key]) =>
@@ -49,7 +50,7 @@ export async function submitProfile(
 
   const supabase = await createSupabaseServerClient();
 
-  // 2) Auth check
+  
   const { data: record, error: authErr } = await supabase.auth.getUser();
   if (authErr || !record.user) {
     const msg = encodeURIComponent('Session expired, please sign in again');
@@ -62,6 +63,10 @@ export async function submitProfile(
     .select("id")
     .eq("id", record.user.id)
     .single();
+
+  const parsedSkills: Skill[] = typeof skills[0] === 'string'
+  ? JSON.parse(skills[0])
+  : skills;
 
   const payload = {
     id: record.user.id,
@@ -96,18 +101,22 @@ export async function submitProfile(
     const { error } = await supabase.from("profiles").insert(payload);
     profileError = error;
   }
-
+ console.log("Profile Error:", profileError);
   
 
   
-  const skillLinks = skills.map((skillId) => ({
+  const skillLinks = parsedSkills.map((skillId) => ({
     profile_id: record.user.id,
-    skill_id: skillId,
+    skill_id: skillId?.id,
   }));
+
+  console.log("Skill Links:", parsedSkills, skillLinks);
 
   const { error: skillUpsertError } = await supabase
     .from('profile_skills')
     .upsert(skillLinks, { onConflict: 'profile_id, skill_id' });
+
+    console.log("Skill Upsert Error:", skillUpsertError);
 
   
 
@@ -115,9 +124,9 @@ export async function submitProfile(
     const message = profileError?.message ?? skillUpsertError?.message ?? "Unknown error";
     return {
       errors: { form: [message] },
-      values: { ...raw, experience, education, skills },
+      values: { ...raw, experience, education, parsedSkills },
     };
   }
 
-  redirect("/dashboard");
+  redirect("/profile");
 }

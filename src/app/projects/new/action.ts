@@ -11,8 +11,9 @@ export async function submitProject(
   formData: FormData
 ): Promise<ProjectFormState> {
   const raw = Object.fromEntries(formData.entries());
+  const projectId = raw.id;
 
-  // 🛠️ FIX: Parse JSON string into an array of { id, name }
+  
   let parsedSkills: { id: string; name: string }[] = [];
   try {
     parsedSkills = JSON.parse(formData.get("skills") as string);
@@ -57,6 +58,23 @@ export async function submitProject(
     user_id: record.user.id,
   };
 
+  let projectIdToUse = projectId;
+  if (projectId) {
+    
+    const { error: updateError } = await supabase
+      .from("projects")
+      .update(payload)
+      .eq("id", projectId)
+      .eq("user_id", record.user.id);
+
+    if (updateError) {
+      return {
+        errors: { form: [updateError.message] },
+        values: { ...raw, skills: parsedSkills },
+      };
+    }
+  } else {
+
   const { data: insertedProject, error: insertError } = await supabase
     .from("projects")
     .insert(payload)
@@ -69,17 +87,22 @@ export async function submitProject(
       values: { ...raw, skills: parsedSkills },
     };
   }
+    projectIdToUse = insertedProject.id;
+}
 
-  const projectId = insertedProject.id;
+  
 
   const skillLinks = parsedSkills.map((s) => ({
-    project_id: projectId,
+    project_id: projectIdToUse,
     skill_id: s.id,
   }));
 
   const { error: skillUpsertError } = await supabase
     .from("project_skills")
-    .upsert(skillLinks, { onConflict: "project_id, skill_id" });
+    .upsert(skillLinks, {
+    onConflict: "project_id, skill_id",
+    ignoreDuplicates: true
+  });
 
   if (skillUpsertError) {
     return {
@@ -88,5 +111,5 @@ export async function submitProject(
     };
   }
 
-  redirect("/projects");
+  redirect("/projects/me");
 }

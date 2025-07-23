@@ -1,4 +1,5 @@
-/* pages/projects/me/page.tsx */
+'use server';
+
 import { createSupabaseServerClient } from '@/utils/supabase/server-client';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -6,16 +7,15 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { getUserProjects } from '@/app/projects/me/action';
 import { redirect } from 'next/navigation';
-import { LOGO_NAME } from '@/utils/constants';
-
-
-export const dynamic = 'force-dynamic';
-
+import { LOGO_NAME, EDIT_ICON } from '@/utils/constants';
+import { FaGithub } from 'react-icons/fa';
+import { FiLink } from 'react-icons/fi';
+import { formatSlugToTitle } from '@/lib/utils';
 
 export default async function MyProjectsPage({
   searchParams,
 }: {
-  searchParams: { page?: string };
+  searchParams: { page?: string; name?: string };
 }) {
   const supabase = await createSupabaseServerClient();
   const {
@@ -26,13 +26,27 @@ export default async function MyProjectsPage({
 
   const page = Math.max(1, parseInt(searchParams.page ?? '1', 10));
   const perPage = 10;
-  const { projects, errors, count } = await getUserProjects(page, perPage);
+  const searchName = searchParams.name ?? '';
+
+  const { projects, errors, count } = await getUserProjects(page, perPage, searchName);
   const totalPages = Math.ceil(count / perPage);
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-8 space-y-6">
-      <h1 className="text-3xl font-bold mb-4 text-black">My Projects</h1>
+      <h1 className="text-3xl font-bold mb-2 text-black">My Projects</h1>
 
+      {/* 🔍 Search by name */}
+      <form method="get" className="mb-6">
+        <input
+          type="text"
+          name="name"
+          defaultValue={searchName}
+          placeholder="Search by project name..."
+          className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm"
+        />
+      </form>
+
+      {/* 🔥 Error */}
       {errors && (
         <div className="bg-red-100 border-red-400 text-red-800 px-4 py-3 rounded">
           <ul>
@@ -43,16 +57,18 @@ export default async function MyProjectsPage({
         </div>
       )}
 
+      {/* ❌ No Projects */}
       {!errors && projects.length === 0 && (
         <p className="text-gray-400">You haven’t added any projects yet.</p>
       )}
 
+      {/* ✅ Project Cards */}
       <div className="space-y-6">
         {projects.map((project) => (
           <Card
             key={project.id}
             className={
-              `flex flex-col sm:flex-row gap-4 shadow-sm hover:shadow-2xl overflow-hidden p-4 rounded-md transition ` +
+              `flex flex-col sm:flex-row gap-4 shadow-sm hover:shadow-2xl overflow-hidden p-4 rounded-2xl transition backdrop-blur-sm ` +
               (project.status === 'archived'
                 ? 'bg-neutral-100'
                 : project.status === 'draft'
@@ -60,60 +76,89 @@ export default async function MyProjectsPage({
                 : 'bg-white')
             }
           >
-            {/* Image */}
-            <div className="flex-none w-full sm:w-48 h-48 rounded-md overflow-hidden">
-              <Image
-                src={LOGO_NAME}
-                alt={project.name}
-                width={192}
-                height={192}
-                className="object-cover w-full h-full"
-              />
+            {/* Image and links */}
+            <div className="flex-none w-full sm:w-48 flex flex-col items-center">
+              <div className="h-48 w-full rounded-md overflow-hidden">
+                <Image
+                  src={project.display_image_url || LOGO_NAME}
+                  alt={project.name}
+                  width={192}
+                  height={192}
+                  className="object-cover w-full h-full"
+                />
+              </div>
+              <div className="flex gap-3 mt-2 text-gray-600">
+                {project.github_url && (
+                  <a
+                    href={project.github_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-black"
+                    title="View on GitHub"
+                  >
+                    <FaGithub size={20} />
+                  </a>
+                )}
+                {project.website_url && (
+                  <a
+                    href={project.website_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-black"
+                    title="Visit Website"
+                  >
+                    <FiLink size={20} />
+                  </a>
+                )}
+              </div>
             </div>
 
-            {/* Content: name, description, skills each no-grow no-shrink */}
+            {/* Main content */}
             <CardContent className="flex-1 p-0 flex flex-col min-w-0">
               {/* Title */}
-              <div className="flex-none">
+              <div>
                 <Link
-                  href={`/projects/${project.slug}`}
+                  href={`/projects/${project.id}/edit`}
                   className="text-xl font-semibold hover:underline block"
                 >
                   {project.name}
+                  <Image
+                    src={EDIT_ICON}
+                    alt="Edit project"
+                    width={16}
+                    height={16}
+                    className="inline-block ml-2 align-text-bottom"
+                  />
                 </Link>
               </div>
 
-              {/* Description: clamp to 3 lines */}
-              <div className="flex-none mt-2">
-                <p className="block w-full text-gray-700 text-sm break-words overflow-hidden line-clamp-3">
-                  {project.description}
-                </p>
-              </div>
+              {/* Description */}
+              <p className="mt-2 text-gray-700 text-sm line-clamp-3">
+                {project.description}
+              </p>
 
               {/* Skills */}
-              <div className="flex-none mt-4">
-                <div className="flex flex-wrap gap-2">
-                  {project.skills.map((skill) => (
-                    <Badge
-                      key={skill.id}
-                      className="text-xs px-2 py-1 rounded-full bg-opacity-90 flex-none"
-                      style={{ backgroundColor: stringToColor(skill.name) }}
-                    >
-                      {skill.name}
-                    </Badge>
-                  ))}
-                </div>
+              <div className="flex flex-wrap gap-2 mt-4">
+                {project.skills.map((skill) => (
+                  <Badge
+                    key={skill.id}
+                    className="text-xs px-2 py-1 rounded-full bg-opacity-90"
+                    style={{ backgroundColor: stringToColor(skill.name) }}
+                  >
+                    {formatSlugToTitle(skill.name)}
+                  </Badge>
+                ))}
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Pagination controls */}
+      {/* Pagination */}
       <div className="flex justify-between items-center pt-6">
         {page > 1 ? (
           <Link
-            href={`?page=${page - 1}`}
+            href={`?page=${page - 1}&name=${encodeURIComponent(searchName)}`}
             className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
           >
             Previous
@@ -128,7 +173,7 @@ export default async function MyProjectsPage({
 
         {page < totalPages ? (
           <Link
-            href={`?page=${page + 1}`}
+            href={`?page=${page + 1}&name=${encodeURIComponent(searchName)}`}
             className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
           >
             Next

@@ -1,3 +1,4 @@
+'use server';
 import { type NextRequest, type NextResponse } from "next/server";
 import { cookies as headersCookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";

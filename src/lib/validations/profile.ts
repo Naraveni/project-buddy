@@ -37,7 +37,7 @@ export const profileSchema = z.object({
   username:    z.string().trim().min(1, "Username is required"),
   bio:         z.string().trim().min(1, "Bio is required"),
   status:      z.enum(["Employed", "Student", "Looking For Employment", "Upskilling"]),
-  country:     z.string().trim().min(1, "Country is required"),
+  country:     z.string().trim().min(1, "Country is required").max(25, "Country name is too long"),
   pincode:     z.string().trim().regex(/^[0-9]{5}$/, "Pincode must be 5 digits"),
 
   experience: z.array(expSchema).optional(),

@@ -60,6 +60,9 @@ export default function ProjectFormPage({
           defaultValue={formState.values?.name}
           required
         />
+        {formState.values?.id && (
+  <input type="hidden" name="id" value={formState.values.id} />
+)}
         <Textarea
           name="description"
           placeholder="Project Description"

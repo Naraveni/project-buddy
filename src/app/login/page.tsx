@@ -95,7 +95,7 @@ const SignUpPage: React.FC = () => {
     }
   };
 
-  if (checking) return null; // or <LoadingSpinner />
+  if (checking) return null;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-black to-indigo-950 text-white flex flex-col items-center justify-center px-4 py-10 space-y-10">

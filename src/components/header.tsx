@@ -7,8 +7,8 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { POST as logout } from "@/app/logout/action";
-
+import LogoutButton from "@/app/logout/page";
+import { IoPerson, IoChatboxEllipsesOutline } from "react-icons/io5";
 import { LOGO_NAME } from "@/utils/constants";
 import {
   DropdownMenu,
@@ -16,6 +16,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+
 
 export default async function Header() {
   const supabase = await createSupabaseServerClient();
@@ -31,7 +32,13 @@ export default async function Header() {
             href="/"
             className="flex items-center space-x-2 hover:text-neutral-300 transition text-white font-bold text-xl"
           >
-            <Image src={LOGO_NAME} width={8} height={8} alt="ProjectBuddy Logo" className="h-8 w-8" />
+            <Image
+              src={LOGO_NAME}
+              width={8}
+              height={8}
+              alt="ProjectBuddy Logo"
+              className="h-8 w-8"
+            />
             <span>ProjectBuddy</span>
           </Link>
 
@@ -41,7 +48,10 @@ export default async function Header() {
                 <NavigationMenuItem>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="text-white font-semibold hover:bg-neutral-900 hover:text-white hover:no-b">
+                      <Button
+                        variant="outline"
+                        className="text-white font-semibold border bg-black border-black hover:border-amber-50 focus-visible::outline-none focus-visible:ring-0  focus-visible:border-transparent "
+                      >
                         Projects
                       </Button>
                     </DropdownMenuTrigger>
@@ -53,7 +63,35 @@ export default async function Header() {
                         <Link href="/projects/me">My Projects</Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link href="/projects/community">Community Projects</Link>
+                        <Link href="/projects/community">
+                          Community Projects
+                        </Link>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="text-white font-semibold border bg-black border-black hover:border-amber-50 focus-visible::outline-none focus-visible:ring-0  focus-visible:border-transparent"
+                      >
+                        Postings
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56">
+                      <DropdownMenuItem asChild>
+                        <Link href="/postings/new">Add Posting</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/postings/postings?view_mode=my_postings">
+                          My Postings
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/postings/postings?view_mode=community_postings">
+                          Community Postings
+                        </Link>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -62,19 +100,19 @@ export default async function Header() {
             </NavigationMenu>
           )}
         </div>
+
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
           {user ? (
             <>
-              <span className="text-white font-semibold">You</span>
-              <form action={logout}>
-                <Button
-                  type="submit"
-                  variant="destructive"
-                  className="text-white border-white hover:bg-neutral-800 hover:text-white"
-                >
-                  Logout
-                </Button>
-              </form>
+            <Link className="text-white font-semibold" href="/chats">
+                <IoChatboxEllipsesOutline  className="inline-block mr-1 text-lg" />
+                Chats
+              </Link>
+              <Link className="text-white font-semibold" href="/profile">
+                <IoPerson className="inline-block mr-1 text-lg" />
+                You
+              </Link>
+              <LogoutButton />
             </>
           ) : (
             <>
