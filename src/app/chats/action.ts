@@ -2,7 +2,7 @@
 
 import { createSupabaseServerClient } from '@/utils/supabase/server-client';
 import { redirect } from 'next/navigation';
-import { Chat, Message } from '@/lib/types';
+import { Chat, ChatMessage } from '@/lib/types';
 
 export async function getUserChats(): Promise<(Chat & { unread_count: number })[]> {
   const supabase = await createSupabaseServerClient();
@@ -19,7 +19,7 @@ export async function getUserChats(): Promise<(Chat & { unread_count: number })[
   // Fetch chats where user is either participant or owner
   const { data: chats, error: chatError } = await supabase
     .from('chats')
-    .select('*')
+    .select('*, user:user_id(username), owner:user_owner_id(username)')
     .or(`user_id.eq.${user.id},user_owner_id.eq.${user.id}`)
     .order('created_at', { ascending: false });
 
@@ -30,27 +30,34 @@ export async function getUserChats(): Promise<(Chat & { unread_count: number })[
 
   const chatIds = chats.map((chat) => chat.id);
 
-  // Fetch last 12 messages across all relevant chats
-  const { data: allMessages, error: msgError } = await supabase
+  const { data: allMessagesRaw, error: msgError } = await supabase
     .from('messages')
-    .select('id, text, sender_id, chat_id, created_at')
+    .select('id, text, sender_id, chat_id, created_at, user:sender_id(username) ')
     .in('chat_id', chatIds)
-    .order('created_at', { ascending: true });
+    .order('created_at', { ascending: true }).limit(25);
+  
+  const allMessages: ChatMessage[] = (allMessagesRaw ?? []).map((msg) => ({
+    ...msg,
+    user: Array.isArray(msg.user) ? msg.user[0] : msg.user,
+  }));
 
   if (msgError) {
     console.warn('Failed to fetch messages:', msgError.message);
   }
 
   // Group messages per chat (keep only last 12)
-  const groupedMessages: Record<string, Message[]> = {};
+  const groupedMessages: Record<string, ChatMessage[]> = {};
   for (const msg of allMessages ?? []) {
+    if (!msg.chat_id) {
+      continue;
+    }
     if (!groupedMessages[msg.chat_id]) {
       groupedMessages[msg.chat_id] = [];
     }
     groupedMessages[msg.chat_id].push(msg);
   }
   for (const chatId in groupedMessages) {
-    groupedMessages[chatId] = groupedMessages[chatId].slice(-12);
+    groupedMessages[chatId] = groupedMessages[chatId]
   }
 
   // Fetch last_seen_at info for user

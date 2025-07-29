@@ -41,7 +41,7 @@ interface PostingsFilterProps {
 
 export default function PostingsFilter({
   currentValues,
-  projects, viewMode = 'my_postings'
+  projects, viewMode
 }: PostingsFilterProps) {
   return (
     <form method="get" className="flex flex-col  sm:flex-row gap-6 mb-6 pt-4">
@@ -49,7 +49,7 @@ export default function PostingsFilter({
         <div className="w-full">
           <RadioGroup.Root
           name="view_mode"
-      defaultValue={ viewMode}
+      defaultValue={ viewMode || "my_postings" }
       className="max-w-sm w-full grid grid-cols-2 gap-3"
     >
       {options.map((option) => (
@@ -85,7 +85,7 @@ export default function PostingsFilter({
         <div className="w-full">
           <Label htmlFor="status">Status</Label>
           <Select name="status" defaultValue={currentValues.status ?? "all"}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full pb-1">
               <SelectValue placeholder="Select status" />
             </SelectTrigger>
             <SelectContent>

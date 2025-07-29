@@ -17,12 +17,10 @@ export async function getProjectById(id: string) {
 
 export async function getPostingById(id: string) {
   const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
   const { data, error } = await supabase
     .from('postings')
     .select('*, skills(id, name)')
     .eq('id', id)
-    .eq('user_id', user?.id)
     .single();
 
   if (error) return null;
@@ -73,6 +71,22 @@ export async function getUserProjectsList(): Promise<
   if (error || !data) return [];
 
   return data;
+
+
+
+}
+
+export async function getUserById(userId: string): Promise<{ id: string; username: string } | null> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, username")
+    .eq("id", userId)
+    .single();
+
+  if (error || !data) return null;
+
+  return { id: data.id, username: data.username };
 }
 
 export async function getUser(): Promise<{ id: string; name: string } | null> {

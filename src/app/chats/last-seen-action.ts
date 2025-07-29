@@ -9,12 +9,16 @@ export async function updateLastSeen(chatId: string) {
 
   if (!user) return;
 
-  const { error } = await supabase
+  const { error} = await supabase
     .from('chat_participants')
     .upsert({
       chat_id: chatId,
       user_id: user.id,
       last_seen_at: new Date().toISOString(),
-    });
-    console.log(error)
+    },
+  {
+    onConflict: 'chat_id,user_id',
+  });
+
+  console.log(error);
 }

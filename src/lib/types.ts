@@ -28,6 +28,9 @@ export interface Experience {
   sender_id: string;
   chat_id: string;
   created_at: string;
+  user?: {
+    username: string;
+  };
 }
 
 export interface Chat {
@@ -40,6 +43,12 @@ export interface Chat {
   name: string;
   messages: ChatMessage[];
   unread_count?: number;
+  user?: {
+    username: string;
+  }
+  owner?: {
+    username: string;  
+  }
 }
 
 
@@ -189,5 +198,8 @@ export interface Message {
   sender_id?: string;
   created_at?: string;
   chat_id?: string;
+  user?: {
+    username: string;
+  };  
 }
 

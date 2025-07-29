@@ -14,11 +14,14 @@ interface FilterParams {
 }
 
 export async function getUserPostings(
-  page: number = 1,
+
+  curPage: number = 1,
   perPage: number = 10,
   filters: FilterParams = {}
 ): Promise<{ postings: Posting[]; errors?: Record<string, string[]>; count: number }> {
   const supabase = await createSupabaseServerClient();
+  console.log('Fetching user postings with filters:', filters);
+  
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -28,7 +31,7 @@ export async function getUserPostings(
     redirect(`/login?flash=${msg}`);
   }
 
-  const from = (page - 1) * perPage;
+  const from = (curPage - 1) * perPage;
   const to = from + perPage - 1;
 
   let query = supabase.from('postings').select(
@@ -54,8 +57,9 @@ export async function getUserPostings(
       .neq('user_id', user.id);
   } else {
     query = query.eq('user_id', user.id);
+    
 
-    if (filters.status) {
+    if (filters.status && filters.status !== 'all') {
       query = query.eq('status', filters.status);
     }
   }

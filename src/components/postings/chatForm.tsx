@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
-import { createChatForPosting } from '@/app/postings/postings/create-chat-action';
+import { createChatForPosting } from '@/app/postings/view/create-chat-action';
 import { IoChatboxEllipsesOutline } from 'react-icons/io5';
 import { Button } from '@/components/ui/button';
 
@@ -19,7 +19,7 @@ export default function ChatFormClient({ postingId }: { postingId: string }) {
   return (
     <form action={formAction}>
       
-<div className='absolute top-4 right-4 flex gap-2 items-center'>
+<div className=' top-4 right-4 flex gap-2 items-center'>
       {state?.errors && state.errors.length > 0 && (
         <div className="text-red-500">{state.errors.join(', ')}</div>
       )}

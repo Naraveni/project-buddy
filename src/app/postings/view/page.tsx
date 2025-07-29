@@ -8,6 +8,8 @@ import PostingsFilter from "@/components/postings/filter";
 import { getUserPostings } from "./action";
 import { getUserProjectsList, getUser } from "@/lib/queries";
 import ChatFormClient from "@/components/postings/chatForm";
+import { MdEdit } from "react-icons/md";
+import { GrView } from "react-icons/gr";
 
 import {
   CalendarDays,
@@ -26,25 +28,36 @@ interface SearchParams {
   start_date?: string;
   end_date?: string;
   view_mode?: string;
+  errors?: string[];
 }
 
 export default async function MyPostingsPage({
   searchParams,
-  errors,
 }: {
   searchParams: SearchParams;
-  errors?: string[];
 }) {
-  const page = Math.max(1, parseInt(searchParams.page ?? "1", 10));
+  const {
+    project_id,
+    status,
+    mode,
+    start_date,
+    end_date,
+    view_mode = "my_postings",
+    page,
+    errors,
+  } = await searchParams;
+  const error_messages: string[] =
+    typeof errors === "string" ? (JSON.parse(errors) as string[]) : [];
+  const curPage = Math.max(1, parseInt(page ?? "1", 10));
   const perPage = 10;
 
-  const { postings, count } = await getUserPostings(page, perPage, {
-    project_id: searchParams.project_id,
-    status: searchParams.status,
-    mode_of_meeting: searchParams.mode,
-    start_date: searchParams.start_date,
-    end_date: searchParams.end_date,
-    view_mode: searchParams.view_mode,
+  const { postings, count } = await getUserPostings(curPage, perPage, {
+    project_id: project_id,
+    status: status,
+    mode_of_meeting: mode,
+    start_date: start_date,
+    end_date: end_date,
+    view_mode: view_mode,
   });
 
   const projects = await getUserProjectsList();
@@ -58,22 +71,23 @@ export default async function MyPostingsPage({
         <PostingsFilter
           projects={projects}
           currentValues={{
-            project_id: searchParams.project_id,
-            status: searchParams.status,
-            mode: searchParams.mode,
-            start_date: searchParams.start_date,
-            end_date: searchParams.end_date,
+            project_id: project_id,
+            status: status,
+            mode: mode,
+            start_date: start_date,
+            end_date: end_date,
           }}
-          viewMode={searchParams.view_mode || "my_postings"}
+          viewMode={view_mode || "my_postings"}
         />
       </div>
 
       <div className="px-6 py-6 space-y-6 overflow-y-auto h-full">
         <h1 className="text-3xl font-bold text-black">
-          {searchParams.view_mode === "my_postings"
-            ? "My Postings"
-            : "Community Postings"}
+          {view_mode === "my_postings" ? "My Postings" : "Community Postings"}
         </h1>
+        {error_messages && error_messages.length > 0 && (
+          <p className="text-xs text-red-500">{error_messages.join(" ,")}</p>
+        )}
 
         {postings.length === 0 && (
           <p className="text-gray-400">No postings yet.</p>
@@ -93,12 +107,10 @@ export default async function MyPostingsPage({
             <CardContent className="flex flex-col gap-4">
               <div className="flex items-center gap-2">
                 <Briefcase className="h-4 w-4 text-gray-500" />
-                <Link
-                  href={`/postings/${posting.id}/edit`}
-                  className="text-xl font-semibold hover:underline block"
-                >
+                <span className="text-xl font-semibold block">
                   {posting.role_name}
-                </Link>
+                </span>
+
                 <Badge
                   variant="outline"
                   className={`text-xs capitalize flex items-center gap-1 ${
@@ -111,10 +123,27 @@ export default async function MyPostingsPage({
                 >
                   <Tag className="w-3 h-3" />
                   {posting.status}
+                  
                 </Badge>
-                {posting.user_id != user?.id && posting.status === "open" && (
-                  <ChatFormClient postingId={posting.id} />
-                )}
+                
+                <div className="flex items-center gap-4 ml-auto">
+                  <Link href={`/postings/${posting.id}/view`}>
+    <GrView className="w-5 h-5 text-gray-500 hover:text-black" />
+  </Link>
+   
+  {posting.status === "open" && posting.user_id !== user?.id && (
+    <ChatFormClient postingId={posting.id} />
+  )}
+  
+  {view_mode !== "community_postings" && posting.user_id === user?.id && (
+    <Link href={`/postings/${posting.id}/edit`}>
+      <MdEdit className="w-5 h-5 text-gray-500 hover:text-black" />
+    </Link>
+  )}
+
+</div>
+
+
               </div>
 
               {/* Description */}
@@ -168,9 +197,9 @@ export default async function MyPostingsPage({
 
         {/* Pagination */}
         <div className="flex justify-between items-center pt-6">
-          {page > 1 ? (
+          {curPage > 1 ? (
             <Link
-              href={`?page=${page - 1}`}
+              href={`?page=${curPage - 1}`}
               className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
             >
               Previous
@@ -183,9 +212,9 @@ export default async function MyPostingsPage({
             Page {page} of {totalPages || 1}
           </span>
 
-          {page < totalPages ? (
+          {curPage < totalPages ? (
             <Link
-              href={`?page=${page + 1}`}
+              href={`?page=${curPage + 1}`}
               className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
             >
               Next

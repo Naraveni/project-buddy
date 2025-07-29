@@ -1,7 +1,8 @@
 // utils/supabase-subscriptions.ts
+import { ChatMessage } from '@/lib/types';
 import { createSupabaseBrowserClient } from '@/utils/supabase/browser-client';
 
-export function subscribeToMessages(chat_id: string, onNewMessage: (msg: string) => void) {
+export function subscribeToMessages(chatsIds: string[], chat_id: string, onNewMessage: (msg: ChatMessage) => void) {
   const supabase = createSupabaseBrowserClient();
 
   return supabase
@@ -12,10 +13,10 @@ export function subscribeToMessages(chat_id: string, onNewMessage: (msg: string)
         event: 'INSERT',
         schema: 'public',
         table: 'messages',
-        filter: `chat_id=eq.${chat_id}`,
       },
       (payload) => {
-        onNewMessage(payload?.new);
+        console.log('New message received:', payload);
+        onNewMessage(payload?.new as ChatMessage);
       }
     )
     .subscribe();

@@ -2,6 +2,7 @@
 
 import { createSupabaseServerClient } from '@/utils/supabase/server-client';
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 
 export async function createChatForPosting(formData: FormData) {
   const postingId = formData.get('postingId') as string;
@@ -19,7 +20,7 @@ export async function createChatForPosting(formData: FormData) {
     return { success: false, errors: ['Not authenticated'] };
   }
 
-  try {
+  
     // Step 1: Check if chat already exists
     const { data: existingChat, error: existingChatError } = await supabase
       .from('chats')
@@ -33,7 +34,7 @@ export async function createChatForPosting(formData: FormData) {
     }
 
     if (existingChat) {
-      return { success: true, chatId: existingChat.id, message: 'Chat already exists' };
+      redirect(`/chats?chat_id=${existingChat.id}`);
     }
 
     // Step 2: Fetch posting info
@@ -66,13 +67,6 @@ export async function createChatForPosting(formData: FormData) {
       };
     }
 
-
-    console.log('Insering Data', {
-        user_id: user.id,
-        user_owner_id: posting.user_id,
-        post_id: posting.id,
-        name: posting.role_name,
-      })
     // Step 3: Create new chat
     const { data: newChat, error: insertError } = await supabase
       .from('chats')
@@ -91,12 +85,8 @@ export async function createChatForPosting(formData: FormData) {
       return { success: false, errors: [insertError.message] };
     }
 
-    // Step 4: Revalidate chat page
+    
     revalidatePath('/chat');
-
-    return { success: true, chatId: newChat.id, message: 'Chat created' };
-  } catch (e) {
-    console.error('Error creating chat for posting:', e);
-    return { success: false, errors: ['An unexpected error occurred'] };
-  }
+    redirect(`/chats?chat_id=${newChat.id}`);
+  
 }

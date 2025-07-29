@@ -84,12 +84,12 @@ export default async function Header() {
                         <Link href="/postings/new">Add Posting</Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link href="/postings/postings?view_mode=my_postings">
+                        <Link href="/postings/view?view_mode=my_postings">
                           My Postings
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link href="/postings/postings?view_mode=community_postings">
+                        <Link href="/postings/view?view_mode=community_postings">
                           Community Postings
                         </Link>
                       </DropdownMenuItem>

@@ -26,12 +26,6 @@ export async function sendMessage(formData: FormData) {
       return { error: 'User not authenticated.' };
     }
 
-    console.log('Attempting to insert message:', {
-      chat_id,
-      sender_id: user.id,
-      text,
-    });
-
     const { error: insertError } = await supabase.from('messages').insert({
       chat_id,
       sender_id: user.id,
@@ -42,8 +36,6 @@ export async function sendMessage(formData: FormData) {
       console.error('Insert failed:', insertError.message, insertError.details, insertError.hint);
       return { error: 'Failed to send message.' };
     }
-
-    console.log('Message inserted successfully');
     revalidatePath(`/chats/${chat_id}`);
 
     return { success: true };
