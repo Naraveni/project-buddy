@@ -43,7 +43,7 @@ export default async function createBlog(formData: FormData) {
   
   const { data:{ user}} = await supabase.auth.getUser();
   const userId = user?.id;
-  const {  error } = await supabase.from("blogs").insert({
+  const {  error } = await supabase.from("blogs").upsert({
     id: blogId,
     user_id: userId,
     title: parsed.data.title,

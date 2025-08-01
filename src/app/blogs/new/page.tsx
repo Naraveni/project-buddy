@@ -4,7 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { IoIosInformationCircleOutline } from "react-icons/io";
-import { createSupabaseBrowserClient } from "@/utils/supabase/browser-client";
+//TODO: THis form and blogmetadata dialog should be having a common compoenent for the form
 
 import {
   Select,

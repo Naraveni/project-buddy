@@ -8,18 +8,25 @@ import { MdEdit, MdVisibility } from 'react-icons/md';
 import PreviewPane from './previewPane';
 import { BlockNoteView } from '@blocknote/mantine';
 import { imageHandler } from '@/lib/storage';
+import { Blog } from '@/lib/types';
+import { Button } from '../ui/button';
+import BlogMetaData from './blogMetaDataDialog';
+import {  useSearchParams } from 'next/navigation';
 
 
 
 export default function BlockNoteEditorWrapperInner({
-  handleArticleSubmit, id, intialContent = ''
+  handleArticleSubmit, id, intialContent = '',blog
 }: {
   handleArticleSubmit: (data: { status: 'draft' | 'published'; html: string }) => void,
   id: string,
-  intialContent?: string
+  intialContent?: string,
+  blog: Blog,
 }) {
   const [mode, setMode] = useState<'edit' | 'preview'>('edit');
   const [htmlContent, setHtmlContent] = useState('');
+  const searchParams = useSearchParams();
+  const dialogOpenParam = searchParams.get('dialogOpen') === 'true' ? true : false;
   const uploadFile = async (file: File) => {
     return await imageHandler(id, file);
   };
@@ -53,28 +60,28 @@ export default function BlockNoteEditorWrapperInner({
     const html = await editor.blocksToFullHTML(blocks);
     handleArticleSubmit({ status, html });
   };
-
   return (
     <div className="max-w-6xl mx-auto pt-3 space-y-4 h-[88vh] flex flex-col">
       <div className="flex justify-between items-center">
         <div className="flex space-x-4">
-          <button onClick={() => setMode('edit')} className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium border-2 transition-all ${
-            mode === 'edit' ? 'bg-gray-100 text-gray-900 border-gray-600 shadow' : 'bg-white text-gray-500 border-gray-300 hover:border-gray-400'
+          <Button onClick={() => setMode('edit')} className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-200 border-2 transition-all ${
+            mode === 'edit' ? 'bg-gray-100 text-gray-900 border-gray-600 shadow' : 'bg-white text-gray-500 border-gray-300 hover:border-gray-400 '
           }`}>
             <MdEdit className="text-lg" />
             Edit
-          </button>
-          <button onClick={() => setMode('preview')} className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium border-2 transition-all ${
-            mode === 'preview' ? 'bg-gray-100 text-gray-900 border-gray-600 shadow' : 'bg-white text-gray-500 border-gray-300 hover:border-gray-400'
+          </Button>
+          <Button onClick={() => setMode('preview')} className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium border-2 transition-all hover:bg-gray-200 ${
+            mode === 'preview' ? 'bg-gray-100 text-gray-900 border-gray-600 shadow' : 'bg-white text-gray-500 border-gray-300 hover:border-gray-400 ' 
           }`}>
             <MdVisibility className="text-lg" />
             Preview
-          </button>
+          </Button>
+          <BlogMetaData blog={blog} searchParams={searchParams} dialogOpen={dialogOpenParam} />
         </div>
 
         <div className="flex space-x-3">
-          <button onClick={() => handleSubmit('draft')} className="px-4 py-2 rounded-md text-sm font-semibold text-gray-700 bg-gray-100 border border-gray-300 hover:bg-gray-200 transition">Save Draft</button>
-          <button onClick={() => handleSubmit('published')} className="px-4 py-2 rounded-md text-sm font-semibold text-white bg-blue-500 hover:bg-blue-600 transition">Publish</button>
+          <Button onClick={() => handleSubmit('draft')} className="px-4 py-2 rounded-md text-sm font-semibold text-gray-700 bg-gray-100 border border-gray-300 hover:bg-gray-200 transition">Save Draft</Button>
+          <Button onClick={() => handleSubmit('published')} className="px-4 py-2 rounded-md text-sm font-semibold text-white bg-blue-500 hover:bg-blue-600 transition">Publish</Button>
         </div>
       </div>
 
@@ -84,7 +91,7 @@ export default function BlockNoteEditorWrapperInner({
             <BlockNoteView editor={editor} style={{ height: '100%', overflowY: 'auto' }} />
           </div>
         ) : (
-          <PreviewPane html={htmlContent} />
+          <PreviewPane html={htmlContent} blog={blog} />
         )}
       </div>
     </div>

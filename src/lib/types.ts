@@ -222,7 +222,7 @@ export interface Blog {
     summary: string,
     created_at: string,
     updated_at: string,
-    user: {
+    profiles: {
       id: string;
       username: string; 
       image?: string;
