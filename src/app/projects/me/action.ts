@@ -2,7 +2,7 @@
 import { createSupabaseServerClient } from '@/utils/supabase/server-client';
 import { redirect } from 'next/navigation';
 import { Project } from '@/lib/types';
-import { getSignedImageUrl } from '@/lib/queries';
+import { getSignedImageUrl } from '@/lib/storage';
 
 export async function getUserProjects(
   page: number = 1,

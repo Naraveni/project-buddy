@@ -1,4 +1,7 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server-client";
+import { Blog } from "./types";
+import { createSupabaseBrowserClient } from "@/utils/supabase/browser-client";
+
 
 
 export async function getProjectById(id: string) {
@@ -27,28 +30,7 @@ export async function getPostingById(id: string) {
   return data;
 }
 
-export async function getSignedImageUrl(path: string): Promise<string | null> {
-  if (!path) return null;
 
-  const supabase = await createSupabaseServerClient();
-
-  const bucketName = process.env.BUCKET_NAME;
-  if (!bucketName) {
-    console.error('BUCKET_NAME environment variable is not set.');
-    return null;
-  }
-
-  const { data, error } = await supabase.storage
-    .from(bucketName)
-    .createSignedUrl(path, 3600);
-
-  if (error || !data) {
-    console.error('Signed URL error:', error?.message);
-    return null;
-  }
-
-  return data.signedUrl;
-}
 
 
 
@@ -106,4 +88,17 @@ export async function getUser(): Promise<{ id: string; name: string } | null> {
   if (error || !profile) return null;
 
   return { id: user.id, name: `${profile.first_name} ${profile.last_name}` };
+}
+
+export async function getBlogById(id: string, type: string = 'server'): Promise<Blog | null>{
+  
+  const supabase =  type === 'server' ? await createSupabaseServerClient() : await createSupabaseBrowserClient();
+  const { data, error } = await supabase
+    .from('blogs')
+    .select('*, profiles(id, username)')
+    .eq('id', id)
+    .single();
+
+  if (error || !data) return null;
+  return data;
 }

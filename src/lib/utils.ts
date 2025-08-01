@@ -14,7 +14,3 @@ export function formatSlugToTitle(slug: string): string {
     .join(' ');
 }
 
-export function getPublicImageUrl(path: string): string {
-  const projectRef = '<your-project-ref>';
-  return `https://${projectRef}.supabase.co/storage/v1/object/public/projectbuddy/${path}`;
-}

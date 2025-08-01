@@ -203,3 +203,29 @@ export interface Message {
   };  
 }
 
+export interface Blog { 
+  id: string,
+  title: string,
+  content: string,
+  tags: string[],
+  category: | "frontend"
+    | "backend"
+    | "devops"
+    | "deployment"
+    | "design"
+    | "ai"
+    | "product"
+    | "collaboration"
+    | "career"
+    | "other";
+    status: "draft" | "published",
+    summary: string,
+    created_at: string,
+    updated_at: string,
+    user: {
+      id: string;
+      username: string; 
+      image?: string;
+    }
+}
+

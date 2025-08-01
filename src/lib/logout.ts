@@ -3,7 +3,7 @@
 import { createSupabaseBrowserClient } from '@/utils/supabase/browser-client';
 
 export async function logout() {
-  const supabaseClient = createSupabaseBrowserClient();
+  const supabaseClient = await createSupabaseBrowserClient();
   const { error } = await supabaseClient.auth.signOut();
 
   if (error) {

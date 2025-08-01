@@ -132,3 +132,25 @@
   transform-origin: center;
 }
 
+
+.ql-container .ql-image-resize {
+  position: relative;
+  display: inline-block;
+}
+.ql-image-resize .ql-resize-handle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: white;
+  border: 1px solid #777;
+  z-index: 10;
+}
+
+.ql-container {
+  overflow: visible !important;
+  position: relative;
+}
+
+.ql-editor {
+  overflow: visible !important;
+}
