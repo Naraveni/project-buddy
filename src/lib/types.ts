@@ -229,3 +229,5 @@ export interface Blog {
     }
 }
 
+export type Tag = { id: string | null; name: string };
+

@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -9,10 +9,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Blog } from "@/lib/types"
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Blog } from "@/lib/types";
 import React, { useState } from "react";
 import updateBlogMetaData from "@/app/blogs/new/actionDialog";
 import {
@@ -22,6 +22,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { TagsAutocomplete } from "@/components/blog/blogTagsField";
 import { URLSearchParams } from "next/dist/compiled/@edge-runtime/primitives/url";
 
 const categoryOptions = [
@@ -44,7 +45,7 @@ export default function BlogMetaData({
 }: {
   blog: Blog,
   searchParams?: URLSearchParams,
-  dialogOpen: boolean
+  dialogOpen: boolean,
 }): React.JSX.Element {
   const dialogErrorsStr = searchParams?.get('dialogErrors');
   let errors: Record<string, string[]> = {};
@@ -62,7 +63,7 @@ export default function BlogMetaData({
     formData = {
       title: blog?.title || "",
       category: blog?.category || "",
-      tags: Array.isArray(blog?.tags) ? blog.tags.join(', ') : '',
+      tags: blog?.tags || [],
       summary: blog?.summary || "",
       id: blog?.id || ""
     };
@@ -105,8 +106,7 @@ export default function BlogMetaData({
               {renderErrors("summary")}
             </div>
             <div className="grid gap-3">
-              <Label htmlFor="tags">Tags</Label>
-              <Input id="tags" name="tags" defaultValue={formData?.tags} />
+              <TagsAutocomplete initialSelected={formData?.tags || []} />
               {renderErrors("tags")}
             </div>
             <div className="grid gap-3">

@@ -1,11 +1,11 @@
+import { createSupabaseServerClient } from "@/utils/supabase/server-client";
 import createBlog from "./action";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { IoIosInformationCircleOutline } from "react-icons/io";
-//TODO: THis form and blogmetadata dialog should be having a common compoenent for the form
-
+import { TagsAutocomplete } from "@/components/blog/blogTagsField";
 import {
   Select,
   SelectContent,
@@ -27,15 +27,38 @@ const categoryOptions = [
   "other",
 ];
 
-export default function BlogMetadataPage({
+export default async function BlogMetadataPage({
   searchParams,
 }: {
   searchParams?: Record<string, string>;
 }) {
-  const errors = searchParams?.errors ? JSON.parse(searchParams.errors) : {};
-  const formData = searchParams?.formData
-    ? JSON.parse(decodeURIComponent(searchParams.formData))
+  const params = await searchParams;
+  let errors = {};
+  let formData =  params?.formData
+    ? JSON.parse(decodeURIComponent( params?.formData || ''))
     : {};
+
+  const draftId =  params?.draftId;
+  console.log(draftId);
+  if (draftId) {
+    const supabase = await createSupabaseServerClient();
+    const { data: draft } = await supabase
+      .from("form_drafts")
+      .select("data, errors")
+      .eq("id", draftId)
+      .single();
+
+    if (draft) {
+      
+      formData = {
+        title: draft.data.title,
+        category: draft.data.category,
+        summary: draft.data.summary,
+        tags: draft.data.tags.map((tag: string)=> JSON.parse(tag)),
+      };
+       errors = draft.errors;
+    }
+  }
 
   return (
     <form action={createBlog} className="max-w-2xl mx-auto p-6 space-y-6">
@@ -49,13 +72,13 @@ export default function BlogMetadataPage({
           required
           defaultValue={formData.title || ""}
         />
-        {errors?.title && <p className="text-sm text-red-600">{errors.title}</p>}
+        {errors?.title && <p className="text-sm text-red-600">{errors?.title}</p>}
       </div>
 
       <div className="space-y-1">
         <Label htmlFor="category">Category *</Label>
         <Select name="category" required defaultValue={formData.category || ""}>
-          <SelectTrigger>
+          <SelectTrigger className="w-[20ch] max-w-full">
             <SelectValue placeholder="Select a category" />
           </SelectTrigger>
           <SelectContent>
@@ -67,20 +90,13 @@ export default function BlogMetadataPage({
           </SelectContent>
         </Select>
         {errors?.category && (
-          <p className="text-sm text-red-600">{errors.category}</p>
+          <p className="text-sm text-red-600">{errors?.category}</p>
         )}
       </div>
 
       <div className="space-y-1">
-        <Label htmlFor="tags">Tags *</Label>
-        <Input
-          name="tags"
-          id="tags"
-          required
-          placeholder="Comma-separated (e.g., react, nextjs)"
-          defaultValue={formData.tags || ""}
-        />
-        {errors?.tags && <p className="text-sm text-red-600">{errors.tags}</p>}
+        <TagsAutocomplete initialSelected={formData.tags || []} />
+        {errors?.tags && errors?.tags?.length>0 && <p className="text-sm text-red-600">{errors?.tags[0]}</p>}
       </div>
 
       <div className="space-y-1">
@@ -99,11 +115,9 @@ export default function BlogMetadataPage({
 
       <p className="inline-flex items-start gap-2 text-sm text-gray-500">
         <IoIosInformationCircleOutline className="w-8 h-8" />
-        <div>
-          By Submitting this form your blog will be created and moved to drafts.
-          You will have 15 days to edit and publish it,
-          In case of no action it will be deleted automatically.
-        </div>
+        By submitting this form your blog will be created and moved to drafts.
+        You will have 15 days to edit and publish it. In case of no action, it
+        will be deleted automatically.
       </p>
 
       <Button type="submit">Continue to Editor →</Button>

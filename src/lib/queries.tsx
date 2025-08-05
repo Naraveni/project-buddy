@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from "@/utils/supabase/server-client";
 import { Blog } from "./types";
 import { createSupabaseBrowserClient } from "@/utils/supabase/browser-client";
+import { PostgrestError } from "@supabase/supabase-js";
 
 
 
@@ -101,4 +102,70 @@ export async function getBlogById(id: string, type: string = 'server'): Promise<
 
   if (error || !data) return null;
   return data;
+}
+
+
+export async function getBlogs({
+  isPersonal,
+  status,
+  category,
+  title,
+  tags,
+}: {
+  isPersonal: boolean;
+  status?: string;
+  category?: string;
+  title?: string;
+  tags?: string[];
+}): Promise<
+  | { success: true; data: Blog[] }
+  | { success: false; error: PostgrestError }
+> {
+  const supabase = await createSupabaseServerClient();
+  let query = supabase.from('blogs').select('*').limit(20);
+
+  if (isPersonal) {
+    const { data: { user } } = await supabase.auth.getUser();
+    query = query.eq('user_id', user?.id);
+    if (status) {
+      query = query.eq('status', status);
+    }
+  } else {
+    if (tags && tags.length > 0) {
+      const formattedTags = `{${tags.join(',')}}`;
+      query = query.filter('tags', 'cs', formattedTags);
+    }
+
+    if (category) {
+      query = query.eq('category', category);
+    }
+
+    if (title) {
+      query = query.textSearch('title', title, {
+        type: 'plain',
+        config: 'english',
+      });
+    }
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    return { success: false, error };
+  }
+
+  return { success: true, data };
+}
+
+
+
+export async function getTags(search: string): Promise<{id: string, name: string}[]> {
+  const supabase = await createSupabaseBrowserClient();
+  const { data, error } = await supabase.from('tags').select('id, name').filter('name', 'ilike', `%${search}%`).limit(10);
+  console.log("Fetched tags:", data, error);
+  if (error){
+    return [];
+  }
+  return data 
+
 }

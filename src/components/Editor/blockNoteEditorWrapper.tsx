@@ -12,6 +12,7 @@ import { Blog } from '@/lib/types';
 import { Button } from '../ui/button';
 import BlogMetaData from './blogMetaDataDialog';
 import {  useSearchParams } from 'next/navigation';
+import DOMPurify from 'dompurify';
 
 
 
@@ -23,10 +24,11 @@ export default function BlockNoteEditorWrapperInner({
   intialContent?: string,
   blog: Blog,
 }) {
+  const searchParams = useSearchParams();
   const [mode, setMode] = useState<'edit' | 'preview'>('edit');
   const [htmlContent, setHtmlContent] = useState('');
-  const searchParams = useSearchParams();
-  const dialogOpenParam = searchParams.get('dialogOpen') === 'true' ? true : false;
+  
+  const dialogOpenParam = searchParams.get('dialogOpen') === 'true' ? true :false;
   const uploadFile = async (file: File) => {
     return await imageHandler(id, file);
   };
@@ -38,7 +40,7 @@ export default function BlockNoteEditorWrapperInner({
     async function loadInitialHTML() {
       if(!intialContent) return;
       if (!editor) return;
-      const blocks = await editor.tryParseHTMLToBlocks(intialContent);
+      const blocks = await editor.tryParseHTMLToBlocks(DOMPurify.sanitize(intialContent));
       editor.replaceBlocks(editor.document, blocks);
     }
     loadInitialHTML();

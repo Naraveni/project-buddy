@@ -26,7 +26,7 @@ function stringToColor(str: string) {
   return `hsl(${hue}, 70%, 40%)`;
 }
 
-export default async function ProfilePage() {
+export default async  function ProfilePage() {
   const { profile, skills, projects, error } = await getProfileData();
 
   if (error || !profile) {
