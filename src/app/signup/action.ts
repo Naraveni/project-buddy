@@ -1,4 +1,4 @@
-'use server'
+'use server';
 import { profileSchema } from "@/lib/validations/profile";
 import { createSupabaseServerClient } from "@/utils/supabase/server-client";
 import { redirect } from "next/navigation";

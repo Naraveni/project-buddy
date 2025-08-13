@@ -7,7 +7,7 @@ export async function getSignedImageUrl(path: string): Promise<string | null> {
 
   const supabase = await createSupabaseServerClient();
 
-  const bucketName = process.env.BUCKET_NAME;
+  const bucketName = process.env.NEXT_PUBLIC_BUCKET_NAME;
   if (!bucketName) {
     console.error('BUCKET_NAME environment variable is not set.');
     return null;

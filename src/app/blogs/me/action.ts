@@ -1,29 +1,21 @@
-import { createSupabaseServerClient } from "@/utils/supabase/server-client"
-import { getBlogs } from "@/lib/queries";
+'use server';
 
-export default async function getPersonalBlogs(formData: FormData) {
-    const supabase = await createSupabaseServerClient();
-    const { data: {user}} = await  supabase.auth.getUser();
-    if(!user?.id){
-        const msg = JSON.stringify(encodeURIComponent('Session Expired Please Login Again..'))
-        redirect(`/login?flash=${msg}`)
-    }
-    const category = formData.get('category')?.toString();
-    const title = formData.get('title')?.toString();
-    const status = formData.get('status')?.toString();
-    const tagsRaw = formData.getAll('tags');
-    const tags = tagsRaw
-        .filter((tag): tag is string => typeof tag === 'string')
-        .map(tag => tag);
-    const isPersonal = formData.get('isPersonal') ? true : false
-    
-    const result = await getBlogs({isPersonal,status, category, title, tags})
-    const { success, data, error } = result;
-    if(success){
-        return data;
-    }
-    if(error){
-        const msg = JSON.stringify(encodeURIComponent(error.message))
-        redirect(`/blogs?flash=${msg}`)
-    }
+import { redirect } from 'next/navigation';
+
+export default async function fetchBlogs(formData: FormData) {
+  const title = formData.get("title");
+  const category = formData.get("category");
+  const status = formData.get("status");
+  const tags = formData.getAll("tags");
+
+  const params = new URLSearchParams();
+
+  if (title) params.set("title", title.toString());
+  if (category) params.set("category", category.toString());
+  if (status) params.set("status", status.toString());
+  for (const tag of tags) {
+    params.append("tags", tag.toString());
+  }
+
+  redirect(`/blogs/me/?${params.toString()}`);
 }

@@ -7,20 +7,32 @@ import { createSupabaseServerClient } from "@/utils/supabase/server-client";
 
 type TagInput = { id: string | null; name: string };
 
-export default async function createBlog(formData: FormData) {
+const redirectToBlogForm = (id: string | null, draftId: string) => {
+  if (id) {
+    return redirect(`/blogs/${id}/edit?draftId=${draftId}&dialogOpen=true`);
+  } else {
+    return redirect(`/blogs/new?draftId=${draftId}`);
+  }
+};
+
+export default async function upsertBlog(formData: FormData) {
   const raw = {
     title: formData.get("title")?.toString()?.trim(),
     category: formData.get("category")?.toString()?.trim(),
     tags: formData.getAll("tags") as string[] | undefined,
     summary: formData.get("summary")?.toString()?.trim(),
   };
-  console.log(raw,"Raw")
 
+  const upsertBlogId = formData.get("id")?.toString() || null;
+  const draftId = uuidv4();
 
   const formattedTags: TagInput[] = raw.tags
-    ? raw.tags.map((tagStr) => JSON.parse(tagStr))
+    ? raw.tags.map((tagStr) => {
+        const parsed = JSON.parse(tagStr);
+        const normalizedName = parsed.name?.toLowerCase().replace(/\s+/g, "_");
+        return { id: parsed.id, name: normalizedName };
+      })
     : [];
-    console.log("formatted Tags", formattedTags)
 
   const parsed = blogMetadataSchema.safeParse({
     ...raw,
@@ -28,14 +40,18 @@ export default async function createBlog(formData: FormData) {
   });
 
   const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const userId = user?.id;
 
-  const draftId = uuidv4();
+  console.log("USER ID:", userId);
+  console.log("RAW FORM DATA:", raw);
+  console.log("PARSED FORM DATA:", parsed);
 
   if (!parsed.success) {
     const zodErrors = parsed.error.flatten().fieldErrors;
-    console.log("❌ Zod validation failed:", zodErrors);
+    console.log("ZOD VALIDATION ERRORS:", zodErrors);
 
     await supabase.from("form_drafts").insert({
       id: draftId,
@@ -45,23 +61,35 @@ export default async function createBlog(formData: FormData) {
       errors: zodErrors,
     });
 
-    console.log("↪️ Redirecting due to Zod validation failure");
-    return redirect(`/blogs/new?draftId=${draftId}`);
+    return redirectToBlogForm(upsertBlogId, draftId);
   }
 
-  const blogId = uuidv4();
+  const blogId = upsertBlogId || uuidv4();
   const slug = parsed.data.title.toLowerCase().replace(/\s+/g, "-");
 
   for (let i = 0; i < formattedTags.length; i++) {
-    if (!formattedTags[i].id) {
+    const tag = formattedTags[i];
+
+    if (!tag.id) {
+      const { data: existingTag, error: _existingTagError } = await supabase
+        .from("tags")
+        .select("id")
+        .eq("name", tag.name)
+        .single(); 
+      if (existingTag) {
+        formattedTags[i].id = existingTag.id;
+        continue;
+      }
+
+      // If not found, insert
       const { data: insertedTag, error: tagError } = await supabase
         .from("tags")
-        .insert({ name: formattedTags[i].name })
+        .insert({ name: tag.name })
         .select("id")
         .single();
-
-      if (tagError) {
-        console.log(`❌ Tag insert error (tag: ${formattedTags[i].name}):`, tagError.message);
+      
+      if (tagError || !insertedTag) {
+        console.error("TAG INSERT ERROR:", tagError);
 
         await supabase.from("form_drafts").insert({
           id: draftId,
@@ -71,26 +99,32 @@ export default async function createBlog(formData: FormData) {
           errors: { database: [tagError.message] },
         });
 
-        console.log("↪️ Redirecting due to tag insert failure");
-        return redirect(`/blogs/new?draftId=${draftId}`);
+        return redirectToBlogForm(upsertBlogId, draftId);
       }
 
       formattedTags[i].id = insertedTag.id;
     }
   }
 
-  const { error: blogError } = await supabase.from("blogs").insert({
-    id: blogId,
-    user_id: userId,
-    title: parsed.data.title,
-    slug,
-    category: parsed.data.category,
-    summary: parsed.data.summary,
-    status: "draft",
-  });
+  console.log("FINAL TAGS WITH IDs:", formattedTags);
+
+  const { error: blogError } = await supabase
+    .from("blogs")
+    .upsert(
+      {
+        id: blogId,
+        user_id: userId,
+        title: parsed.data.title,
+        slug,
+        category: parsed.data.category,
+        summary: parsed.data.summary,
+        status: "draft",
+      },
+      { onConflict: "id" }
+    );
 
   if (blogError) {
-    console.log("❌ Blog insert error:", blogError.message);
+    console.error("BLOG UPSERT ERROR:", blogError);
 
     await supabase.from("form_drafts").insert({
       id: draftId,
@@ -100,8 +134,7 @@ export default async function createBlog(formData: FormData) {
       errors: { database: [blogError.message] },
     });
 
-    console.log("↪️ Redirecting due to blog insert failure");
-    return redirect(`/blogs/new?draftId=${draftId}`);
+    return redirectToBlogForm(upsertBlogId, draftId);
   }
 
   const blogTagsRows = formattedTags.map((tag) => ({
@@ -109,10 +142,14 @@ export default async function createBlog(formData: FormData) {
     tag_id: tag.id,
   }));
 
-  const { error: blogTagsError } = await supabase.from("blog_tags").insert(blogTagsRows);
+  const { error: blogTagsError } = await supabase
+    .from("blog_tags")
+    .upsert(blogTagsRows, {
+      onConflict: "blog_id,tag_id",
+    });
 
   if (blogTagsError) {
-    console.log("❌ Blog tag relation insert error:", blogTagsError.message);
+    console.error("BLOG_TAGS UPSERT ERROR:", blogTagsError, blogTagsRows);
 
     await supabase.from("form_drafts").insert({
       id: draftId,
@@ -122,10 +159,8 @@ export default async function createBlog(formData: FormData) {
       errors: { database: [blogTagsError.message] },
     });
 
-    console.log("↪️ Redirecting due to blog tag relation insert failure");
-    return redirect(`/blogs/new?draftId=${draftId}`);
+    return redirectToBlogForm(upsertBlogId, draftId);
   }
 
-  console.log("✅ Blog creation successful. Redirecting to edit page");
-  redirect(`/blogs/${blogId}`);
+  return redirect(`/blogs/${blogId}/editContent`);
 }

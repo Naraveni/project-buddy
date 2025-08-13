@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useEffect } from 'react';
+import  { useRef, useEffect } from 'react';
 import { useActionState } from 'react';
 import { useToast } from '@/components/useToast';
 import { submitProfile } from '@/app/signup/action';
@@ -15,7 +15,8 @@ import SkillsInput from './skills-input';
 export default function ProfileFormPage({ initialData, errors }: ProfileFormPageProps) {
   const [formState, formAction] = useActionState<ProfileFormState, FormData>(
     submitProfile,
-    { errors: errors ?? {}, values: initialData ?? {} }
+    { errors: errors ?? {}, values: initialData ?? {} },
+    
   );
   const { toast } = useToast();
   const topRef = useRef<HTMLDivElement>(null);

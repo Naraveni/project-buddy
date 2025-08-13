@@ -6,7 +6,6 @@ import { Blog } from '@/lib/types';
 import { FaUserCircle } from "react-icons/fa";
 
 function stringToColor(str: string): string {
-  // simple hash to color function, returns a pastel color
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     hash = str.charCodeAt(i) + ((hash << 5) - hash);
@@ -35,17 +34,17 @@ export default function PreviewPane({ html, blog }: { html: string, blog?: Blog 
       <h1 className="font-extrabold mb-4">{blog.title}</h1>
 
       {/* Summary */}
-      <p className="text-gray-600 mb-6">{blog.summary}</p>
+      <p className="text-gray-600 mb-6 break-words">{blog.summary}</p>
 
       {/* Tags */}
       <div className="flex flex-wrap gap-2 mb-6">
         {(blog.tags || []).map((tag) => (
           <span
-            key={tag}
+            key={tag.id}
             className="px-3 py-1 rounded-full text-sm font-semibold text-white"
-            style={{ backgroundColor: stringToColor(tag) }}
+            style={{ backgroundColor: stringToColor(tag.name) }}
           >
-            #{tag}
+            #{tag.name}
           </span>
         ))}
       </div>

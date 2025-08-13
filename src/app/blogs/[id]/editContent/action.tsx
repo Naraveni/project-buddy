@@ -16,11 +16,12 @@ export default async function saveBlogContent(htmlContent: string,  status: stri
         const loginError = encodeURIComponent(JSON.stringify('Session Expired, Please Login Again'))
         redirect(`/login?flash=${loginError}`)
     }
-
+    console.log("Harsha", parsedData);
     const { error } = await supabase.from('blogs').update({
         content: parsedData.data.content,
         status: parsedData.data.status
     }).eq("id", id).eq("user_id", user?.id)
+    
     if(error){
         const errors = encodeURIComponent(JSON.stringify(error.message))
         redirect(`/blogs/${id}?errors=${errors}`)

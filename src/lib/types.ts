@@ -1,3 +1,6 @@
+import type { Database } from '@/types/supabase';
+import { Database } from './database.types';
+
 export interface Experience {
     employer: string;
     role: string;
@@ -207,7 +210,7 @@ export interface Blog {
   id: string,
   title: string,
   content: string,
-  tags: string[],
+  tags: Tag[],
   category: | "frontend"
     | "backend"
     | "devops"
@@ -230,4 +233,28 @@ export interface Blog {
 }
 
 export type Tag = { id: string | null; name: string };
+
+export type blogFormData = {
+  id?: string,
+  title?: string,
+  category?:string,
+  summary?: string,
+  tags?: Tag[]
+}
+
+export type BlogReactionType = Database['public']['Enums']['blog_reaction_type'];
+
+
+export interface BlogReaction{
+  response: BlogReactionType,
+  count: number
+}
+
+
+export type ReactionRow = Database['public']['Tables']['reactions']['Row']
+
+export interface BlogReactionsSelectorProps {
+  initialSelected?: ReactionRow['response'] ;
+  blogId: string
+}
 

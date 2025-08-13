@@ -69,7 +69,7 @@ export function TagsAutocomplete({ initialSelected = [] }: TagsAutocompleteProps
 
       {selected.map(tag => (
         <Input
-          key={tag.name + tag.id}
+          key={tag.name + tag.id + Date.now().toString()}
           type="hidden"
           name="tags"
           value={JSON.stringify(tag)}
@@ -79,9 +79,9 @@ export function TagsAutocomplete({ initialSelected = [] }: TagsAutocompleteProps
       <div className="flex flex-wrap gap-2 mb-2 items-center">
         {selected.map(tag => (
             <>
-          <Badge key={tag.name + tag.id} variant="secondary" className="flex items-center gap-1 bg-zinc-100 border border-gray-600 shadow-2xl p-1"  onClick={(e) => {e.stopPropagation();removeTag(tag.name)}} >
+          <Badge key={tag.name + tag.id +  + Date.now().toString()} variant="secondary" className="flex items-center gap-1 bg-zinc-100 border border-gray-600 shadow-2xl p-1"  onClick={(e) => {e.stopPropagation();removeTag(tag.name)}} >
             {tag.name}
-            <IoMdClose key={tag.name + tag.id} className="w-3 h-3 cursor-pointer"/>
+            <IoMdClose key={tag.name + tag.id +  + Date.now().toString()} className="w-3 h-3 cursor-pointer"/>
           </Badge>
           
             </>
@@ -100,7 +100,7 @@ export function TagsAutocomplete({ initialSelected = [] }: TagsAutocompleteProps
           {inputFocused && (
             <CommandList>
               {filteredTags.map(tag => (
-                <CommandItem key={tag.id+tag.name} onSelect={() => addTag(tag)} className="cursor-pointer">
+                <CommandItem key={tag.id+tag.name+ + Date.now().toString()} onSelect={() => addTag(tag)} className="cursor-pointer">
                   {tag.name}
                 </CommandItem>
               ))}

@@ -18,12 +18,14 @@ export default function SkillsInput({
   name?: string;
   defaultSkills?: Skill[];
 }) {
+  console.log("default Skills", defaultSkills)
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<Skill[]>([]);
   const [fieldState, setFieldState] = useState<SkillFieldStateType>({
     selected: defaultSkills,
     error: undefined,
   });
+  console.log("Field State", fieldState);
 
 useEffect(() => {
   console.log('Default skills updated:', defaultSkills);
@@ -78,7 +80,7 @@ useEffect(() => {
   };
 
   const addSkill = (skill: Skill) => {
-    if (!fieldState.selected.find((s) => s.id === skill.id)) {
+    if (Array.isArray(fieldState.selected) && !fieldState.selected.find((s) => s.id === skill.id)) {
       setFieldState((prev) => ({
         ...prev,
         selected: [...prev.selected, skill],
@@ -98,7 +100,7 @@ useEffect(() => {
       <label className="text-lg font-semibold mb-2 block">Skills</label>
       <Command>
         <div className="flex flex-wrap gap-1 border border-gray-300 p-3 rounded-md bg-white shadow-sm dark:bg-black dark:border-gray-600">
-          {fieldState.selected.map((s) => (
+          { Array.isArray(fieldState?.selected) && fieldState?.selected?.map((s) => (
             <Badge
               key={`${s.id}-${s.name}`}
               variant="secondary"
@@ -134,10 +136,11 @@ useEffect(() => {
       <input
   type="hidden"
   name={name}
-  value={JSON.stringify(fieldState?.selected?.map(s => ({
+  value={Array.isArray(fieldState?.selected) ? JSON.stringify(fieldState?.selected?.map(s => ({
     id: s.id,
     name: s.name,
-})))}
+}))
+) : ''}
 />
     </div>
   );

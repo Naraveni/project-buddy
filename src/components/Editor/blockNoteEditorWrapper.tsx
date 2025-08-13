@@ -10,9 +10,8 @@ import { BlockNoteView } from '@blocknote/mantine';
 import { imageHandler } from '@/lib/storage';
 import { Blog } from '@/lib/types';
 import { Button } from '../ui/button';
-import BlogMetaData from './blogMetaDataDialog';
-import {  useSearchParams } from 'next/navigation';
 import DOMPurify from 'dompurify';
+import Link from 'next/link';
 
 
 
@@ -24,11 +23,11 @@ export default function BlockNoteEditorWrapperInner({
   intialContent?: string,
   blog: Blog,
 }) {
-  const searchParams = useSearchParams();
+  
   const [mode, setMode] = useState<'edit' | 'preview'>('edit');
   const [htmlContent, setHtmlContent] = useState('');
   
-  const dialogOpenParam = searchParams.get('dialogOpen') === 'true' ? true :false;
+  
   const uploadFile = async (file: File) => {
     return await imageHandler(id, file);
   };
@@ -78,7 +77,8 @@ export default function BlockNoteEditorWrapperInner({
             <MdVisibility className="text-lg" />
             Preview
           </Button>
-          <BlogMetaData blog={blog} searchParams={searchParams} dialogOpen={dialogOpenParam} />
+          <Link href={`/blogs/${blog?.id}/edit`} >
+          <Button>Edit Blog Metadata</Button></Link>
         </div>
 
         <div className="flex space-x-3">

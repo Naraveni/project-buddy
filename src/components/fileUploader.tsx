@@ -23,7 +23,7 @@ export default function FileUploader({ imageUrl, folder, onUpload }: FileUploade
   const [fileName, setfileName] = useState<string>('');
   const { toast } = useToast();
   const supabase = createClient();
-  const bucket = process.env.BUCKET_NAME || '';
+  const bucket = process.env.NEXT_BUCKET_NAME || '';
 
   
   useEffect(() => {

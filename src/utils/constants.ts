@@ -1,8 +1,24 @@
+
+
+
 type providerType = { id: string, name: string }[]
 export const AUTH_PROVIDERS: providerType = [
     { id: "google", name: "Google" },
     { id: "github", name: "GitHub" },
     { id: "linkedin", name: "Linkedin" },
+]
+
+export const blog_reactions  = [
+  'helpful',
+  'informative',
+  'solved_my_issue',
+  'daily_read',
+  'inspiring',
+  'well_written',
+  'thought_provoking',
+  'entertaining',
+  'supportive',
+  'actionable'
 ]
 
 export const PROJECT_BUCKET_IMAGE_PATH = 'project_logo';
