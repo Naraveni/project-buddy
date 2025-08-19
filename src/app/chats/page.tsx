@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { createSupabaseBrowserClient } from "@/utils/supabase/browser-client";
+import { RealtimeChannel } from "@supabase/supabase-js";
 import {
   ExpandableChatHeader,
   ExpandableChatBody,
@@ -14,7 +15,7 @@ import { getUserChats } from "./action";
 import { subscribeToMessages } from "./subscription";
 import { updateLastSeen } from "./last-seen-action";
 import { IoIosArrowDown } from "react-icons/io";
-import {PulseLoader} from "react-spinners";
+import { PulseLoader } from "react-spinners";
 
 import {
   Collapsible,
@@ -33,7 +34,7 @@ export default function ChatPage() {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const supabase = createSupabaseBrowserClient();
+      const supabase = await createSupabaseBrowserClient();
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -51,7 +52,7 @@ export default function ChatPage() {
         setChatIDs(chats.map((chat) => chat.id));
         if (chats.length > 0) {
           const searchParams = new URLSearchParams(window.location.search);
-          const idFromUrl = searchParams.get('chat_id');
+          const idFromUrl = searchParams.get("chat_id");
           if (idFromUrl) {
             const chat = chats.find((c) => c.id === idFromUrl);
             if (chat) {
@@ -63,7 +64,6 @@ export default function ChatPage() {
           } else {
             setCurrentChat(chats[0]);
           }
-          
         }
       } catch (error) {
         console.error("Error fetching chats:", error);
@@ -85,41 +85,40 @@ export default function ChatPage() {
   }, [currentChat]);
 
   useEffect(() => {
-  if (!currentChat?.id || ChatIds.length === 0) return;
+    if (!currentChat?.id || ChatIds.length === 0) return;
+    let sub: RealtimeChannel;
 
-  const sub = subscribeToMessages(ChatIds, currentChat.id, (msg) => {
-    setChats((prevChats) => {
-  const updatedChats = prevChats.map((chat) => {
-    if (chat.id !== msg.chat_id) return chat;
+    subscribeToMessages(ChatIds, currentChat.id, (msg) => {
+      setChats((prevChats) => {
+        const updatedChats = prevChats.map((chat) => {
+          if (chat.id !== msg.chat_id) return chat;
 
-    const updatedChat = { ...chat };
-    updatedChat.messages = [...(updatedChat.messages || []), msg];
+          const updatedChat = { ...chat };
+          updatedChat.messages = [...(updatedChat.messages || []), msg];
 
-    if (currentChat.id !== msg.chat_id) {
-      updatedChat.unread_count = (updatedChat.unread_count || 0) + 1;
-    }
+          if (currentChat.id !== msg.chat_id) {
+            updatedChat.unread_count = (updatedChat.unread_count || 0) + 1;
+          }
 
-    return updatedChat;
-  });
+          return updatedChat;
+        });
 
-  // Move the chat with the new message to the top
-  const index = updatedChats.findIndex(c => c.id === msg.chat_id);
-  if (index > -1) {
-    const [chatToMove] = updatedChats.splice(index, 1);
-    updatedChats.unshift(chatToMove);
-  }
+        const index = updatedChats.findIndex((c) => c.id === msg.chat_id);
+        if (index > -1) {
+          const [chatToMove] = updatedChats.splice(index, 1);
+          updatedChats.unshift(chatToMove);
+        }
 
-  return [...updatedChats];
-});
+        return [...updatedChats];
+      });
 
-    setMessages((prev) => [...prev, msg]);
-  });
+      setMessages((prev) => [...prev, msg]);
+    }).then((subscription) => sub = subscription);
 
-  return () => {
-    sub.unsubscribe();
-  };
-}, [currentChat, ChatIds]);
-
+    return () => {
+      sub?.unsubscribe();
+    };
+  }, [currentChat, ChatIds]);
 
   const requestsForMe = chats.filter((chat) => chat.user_owner_id === userId);
   const myRequests = chats.filter((chat) => chat.user_owner_id !== userId);
@@ -141,9 +140,9 @@ export default function ChatPage() {
         </h4>
 
         {loading ? (
-           <div className="flex items-center justify-center h-full">
-            <PulseLoader/>
-            </div>
+          <div className="flex items-center justify-center h-full">
+            <PulseLoader />
+          </div>
         ) : (
           <div className="space-y-4 overflow-y-auto">
             <Collapsible defaultOpen>
@@ -152,12 +151,14 @@ export default function ChatPage() {
                   variant="default"
                   className="w-full justify-between text-left font-medium text-sm"
                 >
-                  Requests for Your Postings <IoIosArrowDown/>
+                  Requests for Your Postings <IoIosArrowDown />
                 </Button>
               </CollapsibleTrigger>
               <CollapsibleContent className="space-y-2 mt-2">
                 {requestsForMe.length === 0 ? (
-                  <p className="text-sm px-2  text-gray-500">No requests yet.</p>
+                  <p className="text-sm px-2  text-gray-500">
+                    No requests yet.
+                  </p>
                 ) : (
                   requestsForMe.map((chat) => (
                     <div
@@ -171,11 +172,11 @@ export default function ChatPage() {
                     >
                       <div className="flex justify-between items-center">
                         <p className="font-medium text-sm">
-  {chat.name}{" "}
-  <span className="text-xs font-light text-gray-500">
-    From {chat?.user?.username}
-  </span>
-</p>
+                          {chat.name}{" "}
+                          <span className="text-xs font-light text-gray-500">
+                            From {chat?.user?.username}
+                          </span>
+                        </p>
 
                         {typeof chat.unread_count === "number" &&
                           chat.unread_count > 0 && (
@@ -199,10 +200,9 @@ export default function ChatPage() {
               <CollapsibleTrigger asChild>
                 <Button
                   variant="default"
-
                   className="w-full justify-between text-left font-medium text-sm"
                 >
-                  Your Requests to Others <IoIosArrowDown/>
+                  Your Requests to Others <IoIosArrowDown />
                 </Button>
               </CollapsibleTrigger>
               <CollapsibleContent className="space-y-2 mt-2 pb-3">
@@ -221,11 +221,11 @@ export default function ChatPage() {
                     >
                       <div className="flex justify-between items-center">
                         <p className="font-medium text-sm">
-  {chat.name}{" "}
-  <span className="text-xs font-light text-gray-400">
-    To {chat?.owner?.username}
-  </span>
-</p>
+                          {chat.name}{" "}
+                          <span className="text-xs font-light text-gray-400">
+                            To {chat?.owner?.username}
+                          </span>
+                        </p>
                         {typeof chat.unread_count === "number" &&
                           chat.unread_count > 0 && (
                             <span className="ml-2 inline-block text-xs bg-red-500 text-white px-2 py-0.5 rounded-full">
@@ -251,18 +251,22 @@ export default function ChatPage() {
         <ExpandableChatHeader>
           <h3 className=" flex text-2xl font-semibold gap-2 items-baseline">
             {currentChat ? currentChat.name : "Chat"}
-            <p className="text-sm font-medium">From {currentChat?.chat_type === 'incoming' ? currentChat.user?.username :  currentChat?.owner?.username}</p>
+            <p className="text-sm font-medium">
+              From{" "}
+              {currentChat?.chat_type === "incoming"
+                ? currentChat.user?.username
+                : currentChat?.owner?.username}
+            </p>
           </h3>
         </ExpandableChatHeader>
 
         <div className="flex flex-col flex-1 overflow-hidden rounded-xl shadow bg-white">
           <ExpandableChatBody className="flex-1 overflow-y-auto p-4">
-            {loading ? 
-            <div className="flex items-center justify-center h-full">
-            <PulseLoader/>
-            </div>
-              
-             : currentChat ? (
+            {loading ? (
+              <div className="flex items-center justify-center h-full">
+                <PulseLoader />
+              </div>
+            ) : currentChat ? (
               <ChatMessageList>
                 {[...messages].reverse().map((message) => (
                   <div
@@ -274,10 +278,16 @@ export default function ChatPage() {
                     }`}
                   >
                     <p className="text-sm">{message.text}</p>
-          <div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {new Date(message?.created_at || "").toLocaleTimeString()}. {message.sender_id === userId ? "You" : message.user?.username || "Unknown User"}
-                    </p>
+                    <div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {new Date(
+                          message?.created_at || ""
+                        ).toLocaleTimeString()}
+                        .{" "}
+                        {message.sender_id === userId
+                          ? "You"
+                          : message.user?.username || "Unknown User"}
+                      </p>
                     </div>
                   </div>
                 ))}

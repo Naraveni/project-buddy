@@ -1,4 +1,5 @@
 import { clsx, type ClassValue } from "clsx"
+import { SearchParams } from "next/dist/server/request/search-params";
 import { twMerge } from "tailwind-merge"
 
 
@@ -27,4 +28,6 @@ export function stringToColor(str: string) {
   const hue = Math.abs(hash) % 360;
   return `hsl(${hue}, 70%, 40%)`;
 }
+
+
 

@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation';
 
 export default async function fetchBlogs(formData: FormData) {
+  console.log("formDAte",formData)
   const title = formData.get("title");
   const category = formData.get("category");
   const status = formData.get("status");

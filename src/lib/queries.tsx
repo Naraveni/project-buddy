@@ -118,19 +118,23 @@ export async function getBlogs({
   status,
   category,
   title,
+  perPage = 20,
+  page,
   tags,
 }: {
   isPersonal: boolean;
   status?: string;
   category?: string;
   title?: string;
+  page: number;
+  perPage?: number;
   tags?: string[];
 }): Promise<
-  | { success: true; data: Blog[] }
+  | { success: true; data: Blog[], count: number | null }
   | { success: false; error: PostgrestError }
 > {
   const supabase = await createSupabaseServerClient();
-  let query = supabase.from('blogs').select('id, title,category, created_at, status, summary,tags(id,name), profiles(id, username)').limit(20);
+  let query = supabase.from('blogs').select('id, title,category, created_at, status, summary,tags(id,name), profiles(id, username)', {count: 'exact'});
 
   if (isPersonal) {
     const { data: { user } } = await supabase.auth.getUser();
@@ -156,15 +160,16 @@ export async function getBlogs({
       });
     }
   }
+  const from = (page-1)* perPage;
+  const to = from + perPage -1;
 
-
-  const { data, error } = await query;
+  const { data, error, count } = await query.range(from, to);
 
   if (error) {
     return { success: false, error };
   }
-
-  return { success: true, data };
+  console.log("count", count)
+  return { success: true, data, count };
 }
 
 
@@ -232,3 +237,5 @@ export async function getReactions(blog_id: string): Promise<JSON>{
   }
   return data ;
 }
+
+

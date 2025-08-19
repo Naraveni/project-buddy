@@ -1,5 +1,4 @@
-import type { Database } from '@/types/supabase';
-import { Database } from './database.types';
+
 
 export interface Experience {
     employer: string;

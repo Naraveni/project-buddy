@@ -61,7 +61,7 @@ export function BlogFilters({ searchParams = {}, onSubmit }: BlogFiltersProps) {
       <div className="flex flex-col gap-1">
         
         <Select
-          id="category"
+          key="category"
           name="category"
           defaultValue={searchParams.category ?? ''}
         >
@@ -82,7 +82,7 @@ export function BlogFilters({ searchParams = {}, onSubmit }: BlogFiltersProps) {
       <div className="flex flex-col gap-1">
         
         <Select
-          id="status"
+          key="status"
           name="status"
           defaultValue={searchParams.status ?? ''}
         >
@@ -102,7 +102,7 @@ export function BlogFilters({ searchParams = {}, onSubmit }: BlogFiltersProps) {
       {/* Tags */}
       <div className="sm:col-span-2 lg:col-span-3 flex flex-col gap-1">
         <Select
-          id="tags"
+          key="tags"
           name="tags"
           defaultValue={initialTags[0] ?? ''}
         >
