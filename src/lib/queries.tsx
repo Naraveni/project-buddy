@@ -6,6 +6,7 @@ import { createSupabaseBrowserClient } from "@/utils/supabase/browser-client";
 import { PostgrestError } from "@supabase/supabase-js";
 import { ReactionRow } from "./types";
 import { redirect } from "next/navigation";
+import { count } from "console";
 
 export async function getProjectById(id: string) {
   const supabase = await createSupabaseServerClient();
@@ -150,12 +151,14 @@ export async function getBlogs({
       p_tag_ids: tagIds,
     })
     .range(from, to);
+  console.log(data)
 
   if (error) {
     return { success: false, error };
   }
+  const count = data && data.length ?  data[0].total_count : 0;
 
-  return { success: true, data, count: data?.length ?? 0 };
+  return { success: true, data, count: count };
 }
 
 

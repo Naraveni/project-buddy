@@ -28,7 +28,7 @@ const page = Array.isArray(pageParam)
   });
 
   if (!response.success) {
-    console.error(response.error.message);
+    console.error(response?.error &&  response.error.message);
     return <div className="text-red-500 p-4">Failed to load blogs.</div>;
   }
 

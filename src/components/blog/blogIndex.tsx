@@ -29,6 +29,7 @@ export default function BlogsIndex({
   const { page } = searchParams;
   const currentPage = Number(page) || 1;
   const totalPages = Math.ceil(count / perPage);
+  console.log("Ztoral",count)
 
   return (
     <div className="max-w-5xl mx-auto pt-8">
