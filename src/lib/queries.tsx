@@ -238,4 +238,136 @@ export async function getReactions(blog_id: string): Promise<JSON>{
   return data ;
 }
 
+// Helper function to generate username suggestions
+function generateUsernameSuggestions(baseUsername: string, existingUsernames: string[]): string[] {
+  const suggestions: string[] = [];
+  const cleanBase = baseUsername.toLowerCase().replace(/[^a-z0-9_]/g, '');
+  
+  // Try adding numbers
+  for (let i = 1; i <= 5; i++) {
+    const suggestion = `${cleanBase}${i}`;
+    if (!existingUsernames.includes(suggestion)) {
+      suggestions.push(suggestion);
+    }
+  }
+  
+  // Try adding random numbers
+  for (let i = 0; i < 3; i++) {
+    const randomNum = Math.floor(Math.random() * 1000);
+    const suggestion = `${cleanBase}${randomNum}`;
+    if (!existingUsernames.includes(suggestion)) {
+      suggestions.push(suggestion);
+    }
+  }
+  
+  // Try adding underscores with numbers
+  for (let i = 1; i <= 3; i++) {
+    const suggestion = `${cleanBase}_${i}`;
+    if (!existingUsernames.includes(suggestion)) {
+      suggestions.push(suggestion);
+    }
+  }
+  
+  // Try year suffix
+  const currentYear = new Date().getFullYear();
+  const yearSuggestion = `${cleanBase}${currentYear}`;
+  if (!existingUsernames.includes(yearSuggestion)) {
+    suggestions.push(yearSuggestion);
+  }
+  
+  // Remove duplicates and limit to 5 suggestions
+  return [...new Set(suggestions)].slice(0, 5);
+}
+
+export interface UsernameCheckResult {
+  available: boolean;
+  username: string;
+  message: string;
+  suggestions: string[];
+  error?: string;
+}
+
+export async function checkUsernameAvailability(username: string): Promise<UsernameCheckResult> {
+  // Validate username format
+  const usernameRegex = /^[a-zA-Z0-9_]+$/;
+  
+  if (!username || username.length < 3) {
+    return {
+      available: false,
+      username,
+      message: 'Username must be at least 3 characters long',
+      suggestions: []
+    };
+  }
+  
+  if (!usernameRegex.test(username)) {
+    return {
+      available: false,
+      username,
+      message: 'Username can only contain letters, numbers, and underscores',
+      suggestions: []
+    };
+  }
+  
+  try {
+    const supabase = await createSupabaseBrowserClient();
+    
+    // Check if username exists
+    const { data: existingProfile, error } = await supabase
+      .from('profiles')
+      .select('username')
+      .eq('username', username.toLowerCase())
+      .single();
+    
+    if (error && error.code !== 'PGRST116') { // PGRST116 means no rows found
+      console.error('Error checking username:', error);
+      return {
+        available: false,
+        username,
+        message: 'Error checking username availability',
+        suggestions: [],
+        error: error.message
+      };
+    }
+    
+    // Username is available
+    if (!existingProfile) {
+      return {
+        available: true,
+        username: username.toLowerCase(),
+        message: 'Username is available!',
+        suggestions: []
+      };
+    }
+    
+    // Username is taken, generate suggestions
+    // Get similar usernames to avoid suggesting existing ones
+    const { data: similarUsernames } = await supabase
+      .from('profiles')
+      .select('username')
+      .ilike('username', `${username.toLowerCase()}%`)
+      .limit(20);
+    
+    const existingUsernames = similarUsernames?.map(p => p.username) || [];
+    const suggestions = generateUsernameSuggestions(username, existingUsernames);
+    
+    return {
+      available: false,
+      username: username.toLowerCase(),
+      message: 'Username is already taken',
+      suggestions
+    };
+    
+  } catch (error) {
+    console.error('Username check error:', error);
+    return {
+      available: false,
+      username,
+      message: 'Error checking username availability',
+      suggestions: [],
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
+}
+
 
