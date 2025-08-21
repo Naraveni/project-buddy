@@ -11,6 +11,7 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@
 import { ExpEdu } from '@/components/dynamicExpAndEducationForm';
 import { ProfileFormState, ProfileFormPageProps } from '@/lib/types';
 import SkillsInput from './skills-input';
+import UsernameInput from './username-input';
 
 export default function ProfileFormPage({ initialData, errors }: ProfileFormPageProps) {
   const [formState, formAction] = useActionState<ProfileFormState, FormData>(
@@ -59,9 +60,9 @@ export default function ProfileFormPage({ initialData, errors }: ProfileFormPage
           />
         </div>
 
-        <Input
+        <UsernameInput
           name="username"
-          placeholder="Username"
+          placeholder="Choose a unique username"
           defaultValue={formState.values?.username}
           required
         />
