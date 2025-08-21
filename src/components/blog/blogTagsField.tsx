@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Command, CommandInput, CommandList, CommandItem, CommandEmpty } from '@/components/ui/command';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-
 import { Input } from '@/components/ui/input';
 import { getTags } from '@/lib/queries';
 import { Tag } from '@/lib/types';
@@ -13,14 +12,17 @@ import { IoMdClose } from "react-icons/io";
 
 type TagsAutocompleteProps = {
   initialSelected?: Tag[];
+  showAddTags?: boolean
 };
 
-export function TagsAutocomplete({ initialSelected = [] }: TagsAutocompleteProps) {
+export function TagsAutocomplete({ initialSelected = [], showAddTags = true }: TagsAutocompleteProps) {
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<Tag[]>(initialSelected || []);
   const [fetchedTags, setFetchedTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(false);
   const [inputFocused, setInputFocused] = useState(false);
+
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const filteredTags = fetchedTags.filter(
     tag => !selected.some(sel => sel.name.toLowerCase() === tag.name.toLowerCase())
@@ -51,10 +53,11 @@ export function TagsAutocomplete({ initialSelected = [] }: TagsAutocompleteProps
       setSelected([...selected, tag]);
     }
     setQuery('');
+    inputRef.current?.focus();
   };
 
   const removeTag = (name: string) => {
-    setSelected((prev)=>prev.filter(t => t.name !== name));
+    setSelected((prev) => prev.filter(t => t.name !== name));
   };
 
   const handleCreateNewTag = () => {
@@ -65,32 +68,38 @@ export function TagsAutocomplete({ initialSelected = [] }: TagsAutocompleteProps
 
   return (
     <div className="w-full">
-      <Label className="mb-1 block">Tags</Label>
+      {showAddTags && <Label className="mb-1 block">Tags</Label>}
 
+      {/* Hidden inputs for form submission */}
       {selected.map(tag => (
         <Input
-          key={tag.name + tag.id + Date.now().toString()}
+          key={`hidden-${tag.id ?? tag.name}`}
           type="hidden"
           name="tags"
           value={JSON.stringify(tag)}
         />
       ))}
 
-      <div className="flex flex-wrap gap-2 mb-2 items-center">
+      {/* Input field with tags inside */}
+      <div className="relative border rounded-md flex items-center flex-wrap p-1 gap-1 max-h-12 overflow-x-auto overflow-y-hidden">
         {selected.map(tag => (
-            <>
-          <Badge key={tag.name + tag.id +  + Date.now().toString()} variant="secondary" className="flex items-center gap-1 bg-zinc-100 border border-gray-600 shadow-2xl p-1"  onClick={(e) => {e.stopPropagation();removeTag(tag.name)}} >
+          <Badge
+            key={`badge-${tag.id ?? tag.name}`}
+            variant="secondary"
+            className="flex items-center gap-1 bg-zinc-100 border border-gray-600 p-1 shrink-0"
+          >
             {tag.name}
-            <IoMdClose key={tag.name + tag.id +  + Date.now().toString()} className="w-3 h-3 cursor-pointer"/>
+            <IoMdClose
+              className="w-3 h-3 cursor-pointer"
+              onClick={(e) => { e.stopPropagation(); removeTag(tag.name); }}
+            />
           </Badge>
-          
-            </>
         ))}
-      </div>
 
-      <div className="relative">
-        <Command className="border rounded-md shadow-sm">
+        <Command className="flex-1 min-w-[120px]">
           <CommandInput
+            ref={inputRef}
+            className="border-none focus:ring-0 p-1 w-full"
             placeholder="Search or create tag..."
             value={query}
             onValueChange={setQuery}
@@ -98,9 +107,13 @@ export function TagsAutocomplete({ initialSelected = [] }: TagsAutocompleteProps
             onBlur={() => setTimeout(() => setInputFocused(false), 200)}
           />
           {inputFocused && (
-            <CommandList>
+            <CommandList className="absolute z-10 left-0 right-0 top-full mt-1 bg-white shadow-lg border rounded-md">
               {filteredTags.map(tag => (
-                <CommandItem key={tag.id+tag.name+ + Date.now().toString()} onSelect={() => addTag(tag)} className="cursor-pointer">
+                <CommandItem
+                  key={`option-${tag.id ?? tag.name}`}
+                  onSelect={() => addTag(tag)}
+                  className="cursor-pointer"
+                >
                   {tag.name}
                 </CommandItem>
               ))}
@@ -114,19 +127,19 @@ export function TagsAutocomplete({ initialSelected = [] }: TagsAutocompleteProps
             </CommandList>
           )}
         </Command>
-
-        {query.length > 4 && filteredTags.length === 0 && (
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            onClick={handleCreateNewTag}
-            className="mt-2"
-          >
-            {`Add "${query}" as new tag`}
-          </Button>
-        )}
       </div>
+
+      {showAddTags && query.length > 2 && filteredTags.length === 0 && (
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          onClick={handleCreateNewTag}
+          className="mt-2"
+        >
+          {`Add "${query}" as new tag`}
+        </Button>
+      )}
     </div>
   );
 }

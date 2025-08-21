@@ -1,23 +1,22 @@
+'use server';
 import { createSupabaseServerClient } from "@/utils/supabase/server-client";
-import { Blog } from "./types";
+
+import { Blog, Tag } from "./types";
 import { createSupabaseBrowserClient } from "@/utils/supabase/browser-client";
 import { PostgrestError } from "@supabase/supabase-js";
 import { ReactionRow } from "./types";
 import { redirect } from "next/navigation";
 
-
-
-
-
-
 export async function getProjectById(id: string) {
   const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const { data, error } = await supabase
-    .from('projects')
-    .select('*, skills(id, name)')
-    .eq('id', id)
-    .eq('user_id', user?.id)
+    .from("projects")
+    .select("*, skills(id, name)")
+    .eq("id", id)
+    .eq("user_id", user?.id)
     .single();
 
   if (error) return null;
@@ -27,18 +26,14 @@ export async function getProjectById(id: string) {
 export async function getPostingById(id: string) {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
-    .from('postings')
-    .select('*, skills(id, name)')
-    .eq('id', id)
+    .from("postings")
+    .select("*, skills(id, name)")
+    .eq("id", id)
     .single();
 
   if (error) return null;
   return data;
 }
-
-
-
-
 
 export async function getUserProjectsList(): Promise<
   { id: string; name: string }[]
@@ -59,12 +54,11 @@ export async function getUserProjectsList(): Promise<
   if (error || !data) return [];
 
   return data;
-
-
-
 }
 
-export async function getUserById(userId: string): Promise<{ id: string; username: string } | null> {
+export async function getUserById(
+  userId: string
+): Promise<{ id: string; username: string } | null> {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("profiles")
@@ -96,146 +90,161 @@ export async function getUser(): Promise<{ id: string; name: string } | null> {
   return { id: user.id, name: `${profile.first_name} ${profile.last_name}` };
 }
 
-export async function getBlogById(id: string, type: string = 'server'): Promise<Blog | null>{
-  
-  const supabase =  type === 'server' ? await createSupabaseServerClient() : await createSupabaseBrowserClient();
+export async function getBlogById(
+  id: string,
+  type: string = "server"
+): Promise<Blog | null> {
+  const supabase =
+    type === "server"
+      ? await createSupabaseServerClient()
+      : await createSupabaseBrowserClient();
   const { data, error } = await supabase
-    .from('blogs')
-    .select('*, profiles(id, username), tags(id, name)')
-    .eq('id', id)
+    .from("blogs")
+    .select("*, profiles(id, username), tags(id, name)")
+    .eq("id", id)
     .single();
 
-    const { data: _data, error: _error} = await supabase.from('blog_tags').select('*').eq('blog_id', id);
-
+  const { data: _data, error: _error } = await supabase
+    .from("blog_tags")
+    .select("*")
+    .eq("blog_id", id);
 
   if (error || !data) return null;
   return data;
 }
 
-
 export async function getBlogs({
   isPersonal,
-  status,
-  category,
-  title,
+  status = null,
+  category = null,
+  title = null,
+  page = 1,
   perPage = 20,
-  page,
-  tags,
+  tags = [],
 }: {
   isPersonal: boolean;
-  status?: string;
-  category?: string;
-  title?: string;
-  page: number;
+  status?: string | null;
+  category?: string | null;
+  title?: string | null;
+  page?: number;
   perPage?: number;
   tags?: string[];
-}): Promise<
-  | { success: true; data: Blog[], count: number | null }
-  | { success: false; error: PostgrestError }
-> {
+}) {
   const supabase = await createSupabaseServerClient();
-  let query = supabase.from('blogs').select('id, title,category, created_at, status, summary,tags(id,name), profiles(id, username)', {count: 'exact'});
 
-  if (isPersonal) {
-    const { data: { user } } = await supabase.auth.getUser();
-    query = query.eq('user_id', user?.id);
-    if (status) {
-      query = query.eq('status', status);
-    }
-  } else {
-    query = query.eq('status', 'published')
-    if (tags && tags.length > 0) {
-      const formattedTags = `{${tags.join(',')}}`;
-      query = query.filter('tags', 'cs', formattedTags);
-    }
+  const userRes = await supabase.auth.getUser();
+  const userId = userRes.data.user?.id ?? null;
 
-    if (category) {
-      query = query.eq('category', category);
-    }
+  const tagIds = tags.length > 0 ? tags : null;
 
-    if (title) {
-      query = query.textSearch('title', title, {
-        type: 'plain',
-        config: 'english',
-      });
-    }
-  }
-  const from = (page-1)* perPage;
-  const to = from + perPage -1;
+  const from = (page - 1) * perPage;
+  const to = from + perPage - 1;
 
-  const { data, error, count } = await query.range(from, to);
+  const { data, error } = await supabase
+    .rpc("get_blogs_filtered", {
+      p_user_id: userId,
+      p_is_personal: isPersonal,
+      p_status: status || null,
+      p_category: category || null,
+      p_title: title || null,
+      p_tag_ids: tagIds,
+    })
+    .range(from, to);
 
   if (error) {
     return { success: false, error };
   }
-  console.log("count", count)
-  return { success: true, data, count };
+
+  return { success: true, data, count: data?.length ?? 0 };
 }
 
 
-
-export async function getTags(search: string): Promise<{id: string, name: string}[]> {
+export async function getTags(
+  search: string
+): Promise<Tag[]> {
   const supabase = await createSupabaseBrowserClient();
-  const { data, error } = await supabase.from('tags').select('id, name').filter('name', 'ilike', `%${search}%`).limit(10);
+  const { data, error } = await supabase
+    .from("tags")
+    .select("id, name")
+    .filter("name", "ilike", `%${search}%`)
+    .limit(10);
   console.log("Fetched tags:", data, error);
-  if (error){
+  if (error) {
     return [];
   }
-  return data 
+  return data;
 }
 
-export async function setBlogReaction(response: string[], blog_id: string):Promise<void>{
+export async function setBlogReaction(
+  response: string[],
+  blog_id: string
+): Promise<void> {
   const supabase = await createSupabaseBrowserClient();
-  const { data : { user }} = await supabase.auth.getUser();
-  const { data} = await supabase.from('reactions').select('id').eq('user_id', user?.id).eq('blog_id', blog_id)
-  if(data && data.length && data[0].id){
-     const { error } = await supabase.from('reactions').update({response: response}).eq('id', data[0]?.id)
-     if(error){
-      const message = encodeURIComponent('Failed to save reactions please try again')
-      redirect(`${blog_id}?error=${message}`)
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const { data } = await supabase
+    .from("reactions")
+    .select("id")
+    .eq("user_id", user?.id)
+    .eq("blog_id", blog_id);
+  if (data && data.length && data[0].id) {
+    const { error } = await supabase
+      .from("reactions")
+      .update({ response: response })
+      .eq("id", data[0]?.id);
+    if (error) {
+      const message = encodeURIComponent(
+        "Failed to save reactions please try again"
+      );
+      redirect(`${blog_id}?error=${message}`);
     }
-    redirect(`${blog_id}`)
-    
-  }
-  else{
-
+    redirect(`${blog_id}`);
+  } else {
     const payload = {
       response: response,
       blog_id: blog_id,
-      user_id: user?.id
-
+      user_id: user?.id,
+    };
+    const { error } = await supabase.from("reactions").insert(payload);
+    if (error) {
+      const message = encodeURIComponent(
+        "Failed to save reactions please try again"
+      );
+      redirect(`${blog_id}?error=${message}`);
     }
-    const { error } = await supabase.from('reactions').insert(payload)
-    if(error){
-      const message = encodeURIComponent('Failed to save reactions please try again')
-      redirect(`${blog_id}?error=${message}`)
-    }
-    redirect(`${blog_id}`)
+    redirect(`${blog_id}`);
   }
-   
 }
 
-export async function getCurUserReactions(blog_id: string):Promise<ReactionRow['response']>{
+export async function getCurUserReactions(
+  blog_id: string
+): Promise<ReactionRow["response"]> {
   const supabase = await createSupabaseServerClient();
-  const { data: { user }} = await supabase.auth.getUser();
-  const { data, error } = await supabase.from('reactions').select('response').eq('user_id', user?.id).eq('blog_id', blog_id).limit(1)
-  if(error){
-    return []
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const { data, error } = await supabase
+    .from("reactions")
+    .select("response")
+    .eq("user_id", user?.id)
+    .eq("blog_id", blog_id)
+    .limit(1);
+  if (error) {
+    return [];
   }
-  if(data && data.length && data[0].response){
-    return data[0].response
+  if (data && data.length && data[0].response) {
+    return data[0].response;
   }
 }
 
-
-
-export async function getReactions(blog_id: string): Promise<JSON>{
-  const supabase= await createSupabaseServerClient();
-  const {data, error} = await supabase.rpc('get_reaction_counts', { blog_id_param: blog_id });
-  if (error){
-    return JSON.parse('')
+export async function getReactions(blog_id: string): Promise<JSON> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.rpc("get_reaction_counts", {
+    blog_id_param: blog_id,
+  });
+  if (error) {
+    return JSON.parse("");
   }
-  return data ;
+  return data;
 }
-
-

@@ -1,10 +1,9 @@
 'use server';
-
 import formatBlogFilters from '@/components/blog/blogFilterFormat';
 import { redirect } from 'next/navigation';
 
 export default async function fetchBlogs(formData: FormData): Promise<void> {
-  console.log(formData)
-  const params =  formatBlogFilters(formData);
-  redirect(`/blogs/me/?${params.toString()}`);
+  const params = formatBlogFilters(formData);
+
+  redirect(`/blogs/community/?${params.toString()}`);
 }

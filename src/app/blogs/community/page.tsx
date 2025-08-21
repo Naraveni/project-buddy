@@ -3,6 +3,7 @@ import { getUser } from '@/lib/queries';
 
 import BlogsIndex from '@/components/blog/blogIndex';
 import { SearchParams } from 'next/dist/server/request/search-params';
+import fetchBlogs from './action';
 
 export default async function CommunityBlogsPage({ searchParams }: { searchParams: SearchParams }) {
     const params = await searchParams;
@@ -32,6 +33,6 @@ export default async function CommunityBlogsPage({ searchParams }: { searchParam
 
 
   return (
-    <BlogsIndex blogs={response?.data} count={response?.count || 0} searchParams={params}/>
+    <BlogsIndex blogs={response?.data} count={response?.count || 0} searchParams={params} onSubmit={fetchBlogs}/>
   );
 }

@@ -2,11 +2,17 @@ import { getBlogs,getUser } from '@/lib/queries';
 
 import BlogsIndex from '@/components/blog/blogIndex';
 import { SearchParams } from 'next/dist/server/request/search-params';
+import fetchBlogs from './action';
 
 export default async function BlogsPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
   const user = await getUser();
   const id = user?.id;
+  let tagIds: string[] = [];
+
+if (typeof params?.tags === "string" && params.tags.trim() !== "") {
+  tagIds = params.tags.split(",");
+}
   const pageParam = params.page;
   console.log(params.tags)
 const page = Array.isArray(pageParam)
@@ -18,11 +24,7 @@ const page = Array.isArray(pageParam)
     title: params.title as string || '',
     category: params.category as string || '',
     status: params.status as string || '',
-    tags: Array.isArray(params.tags)
-      ? params.tags
-      : params.tags
-      ? [params.tags]
-      : [],
+    tags: tagIds
   });
 
   if (!response.success) {
@@ -32,6 +34,6 @@ const page = Array.isArray(pageParam)
 
 
   return (
-    <BlogsIndex blogs={response?.data} id={id} searchParams={params} count={response?.count}/>
+    <BlogsIndex blogs={response?.data} id={id} searchParams={params} count={response?.count || 0} onSubmit={fetchBlogs}/> 
   );
 }

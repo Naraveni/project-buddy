@@ -1,5 +1,4 @@
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectTrigger,
@@ -8,6 +7,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { getTags } from '@/lib/queries';
+
+import { AsyncMultiSelect } from '../ui/multiselect';
+
 
 const blogCategories = [
   'frontend',
@@ -37,7 +40,6 @@ type BlogFiltersProps = {
 };
 
 export function BlogFilters({ searchParams = {}, onSubmit }: BlogFiltersProps) {
-  // Normalize tags to array
   const initialTags = Array.isArray(searchParams.tags)
     ? searchParams.tags
     : searchParams.tags
@@ -56,14 +58,12 @@ export function BlogFilters({ searchParams = {}, onSubmit }: BlogFiltersProps) {
           className='w-48'
         />
       </div>
-
-      {/* Category */}
       <div className="flex flex-col gap-1">
         
         <Select
           key="category"
           name="category"
-          defaultValue={searchParams.category ?? ''}
+          defaultValue={searchParams.category ?? undefined}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select category" />
@@ -77,14 +77,12 @@ export function BlogFilters({ searchParams = {}, onSubmit }: BlogFiltersProps) {
           </SelectContent>
         </Select>
       </div>
-
-      {/* Status */}
       <div className="flex flex-col gap-1">
         
         <Select
           key="status"
           name="status"
-          defaultValue={searchParams.status ?? ''}
+          defaultValue={searchParams.status ?? undefined}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select status" />
@@ -98,28 +96,14 @@ export function BlogFilters({ searchParams = {}, onSubmit }: BlogFiltersProps) {
           </SelectContent>
         </Select>
       </div>
-
-      {/* Tags */}
       <div className="sm:col-span-2 lg:col-span-3 flex flex-col gap-1">
-        <Select
-          key="tags"
-          name="tags"
-          defaultValue={initialTags[0] ?? ''}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select tags" />
-          </SelectTrigger>
-          <SelectContent>
-            {tags.map((tag) => (
-              <SelectItem key={tag} value={tag}>
-                {tag}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <AsyncMultiSelect fetchData={getTags} maxSelected={4} />
+        {4 > 0 && (
+    <p className="text-xs text-muted-foreground mt-1">
+      You can select up to 4 tags
+    </p>
+  )}
       </div>
-
-      {/* Submit button */}
       <div className="sm:col-span-2 lg:col-span-3 flex justify-end">
         <Button type="submit">Apply Filters</Button>
       </div>
