@@ -1,9 +1,9 @@
 
 export default  function formatBlogFilters(formData: FormData) {
   console.log("formData",formData)
-  const title = formData.get("title");
-  const category = formData.get("category");
-  const status = formData.get("status");
+  const title = formData.get("title")?.toString().trim();
+  const category = formData.get("category")?.toString().trim();
+  const status = formData.get("status")?.toString().trim();
   const tags = formData.getAll("tags");
 
   const params = new URLSearchParams();

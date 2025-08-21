@@ -8,12 +8,25 @@ import { GrEdit } from "react-icons/gr";
 import { SearchParams } from "next/dist/server/request/search-params";
 import { BlogPagination } from "./blogPagination";
 
+// Utility: consistent random color from string
+function stringToColor(str: string) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const color = Math.floor(
+    (Math.abs(Math.sin(hash) * 16777215)) % 16777215
+  ).toString(16);
+  return `#${"000000".substring(0, 6 - color.length) + color}`;
+}
+
 type BlogListProps = {
   blogs: Blog[];
   id?: string;
   searchParams: SearchParams;
   count: number;
   perPage?: number;
+  showStatusField?: boolean;
   onSubmit: (data: FormData) => Promise<void>
 };
 
@@ -22,14 +35,13 @@ export default function BlogsIndex({
   id,
   searchParams = {},
   count,
+  showStatusField = true,
   perPage = 20,
   onSubmit
-  
 }: BlogListProps) {
   const { page } = searchParams;
   const currentPage = Number(page) || 1;
   const totalPages = Math.ceil(count / perPage);
-  console.log("Ztoral",count)
 
   return (
     <div className="max-w-5xl mx-auto pt-8">
@@ -37,62 +49,74 @@ export default function BlogsIndex({
 
       <div className="flex flex-col gap-5">
         <div>
-          <BlogFilters onSubmit={onSubmit} searchParams={searchParams} />
+          <BlogFilters onSubmit={onSubmit} searchParams={searchParams} showStatusField={showStatusField} />
         </div>
 
         <div className="flex flex-col gap-y-5">
-  {blogs.length === 0 ? (
-    <div className="text-center text-3xl font-bold text-gray-400 py-20">
-      🚀 No blogs found
-    </div>
-  ) : (
-    blogs.map((blog) => (
-      <Card key={blog.id} className="h-full hover:shadow-xl transition">
-        <CardHeader>
-          <div className="flex items-baseline gap-2">
-            <Link href={`/blogs/${blog.id}`} className="block">
-              <CardTitle className="text-xl hover:underline">
-                {blog.title}
-              </CardTitle>
-            </Link>
+          {blogs.length === 0 ? (
+            <div className="text-center text-3xl font-bold text-gray-400 py-20">
+              🚀 No blogs found
+            </div>
+          ) : (
+            blogs.map((blog) => (
+              <Card key={blog.id} className="h-full hover:shadow-xl transition">
+                <CardHeader>
+                  <div className="flex items-baseline gap-2">
+                    <Link href={`/blogs/${blog.id}`} className="block">
+                      <CardTitle className="text-xl hover:underline">
+                        {blog.title}
+                      </CardTitle>
+                    </Link>
 
-            {id && blog?.profiles?.id && blog?.profiles?.id === id && (
-              <Link href={`/blogs/${blog.id}/editContent`}>
-                <GrEdit />
-              </Link>
-            )}
-          </div>
-        </CardHeader>
+                    {id && blog?.profiles?.id && blog?.profiles?.id === id && (
+                      <Link href={`/blogs/${blog.id}/editContent`}>
+                        <GrEdit />
+                      </Link>
+                    )}
+                  </div>
+                </CardHeader>
 
-        <CardContent>
-          <p className="text-sm text-black line-clamp-3 mb-4 break-words">
-            {blog.summary}
-          </p>
-          <div className="flex flex-wrap gap-1 mb-4">
-            {blog.tags?.map((tag) => (
-              <Badge
-                key={JSON.stringify(tag.id)}
-                variant="outline"
-                className="text-xs"
-              >
-                {tag?.name}
-              </Badge>
-            ))}
-          </div>
-          <div className="text-sm text-gray-500">
-            By {blog.profiles?.username || "Anonymous"} on{" "}
-            {format(new Date(blog.created_at), "MMM dd, yyyy")}
-          </div>
-        </CardContent>
-      </Card>
-    ))
-  )}
-</div>
-      </div>
-      {totalPages>0 && (
-            
-            <BlogPagination totalPages={totalPages} currentPage={currentPage} searchParams={searchParams}/>
+                <CardContent>
+                  <p className="text-sm text-black line-clamp-3 mb-4 break-words">
+                    {blog.summary}
+                  </p>
+
+                  <div className="flex flex-wrap gap-1 mb-4">
+                    {blog.tags?.map((tag) => (
+                      <Badge
+                        key={String(tag.id)}
+                        style={{
+                          backgroundColor: stringToColor(tag.name),
+                          color: "white",
+                        }}
+                        className="text-xs"
+                      >
+                        {tag?.name}
+                      </Badge>
+                    ))}
+                  </div>
+
+                  <div className="text-sm text-gray-500">
+                    By {blog?.user_name || "Anonymous"} •{" "}
+                    <span className="font-medium text-gray-700">
+                      {blog.category}
+                    </span>{" "}
+                    on {format(new Date(blog.created_at), "MMM dd, yyyy")}
+                  </div>
+                </CardContent>
+              </Card>
+            ))
           )}
+        </div>
+      </div>
+
+      {totalPages > 0 && (
+        <BlogPagination
+          totalPages={totalPages}
+          currentPage={currentPage}
+          searchParams={searchParams}
+        />
+      )}
     </div>
   );
 }

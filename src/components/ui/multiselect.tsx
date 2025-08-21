@@ -2,8 +2,10 @@
 
 import * as React from "react";
 import { X } from "lucide-react";
+import { useEffect } from "react";
 
 import { Badge } from "@/components/ui/badge";
+import { capitalize } from "@/lib/utils";
 import {
   Command,
   CommandGroup,
@@ -12,14 +14,15 @@ import {
 } from "@/components/ui/command";
 import { Command as CommandPrimitive } from "cmdk";
 import { Tag } from "@/lib/types";
+import { getTagsByIds } from "@/lib/queries";
 
 type AsyncMultiSelectProps = {
-  initialSelected?: Tag[];
+  initialSelected?: string[];
   placeholder?: string;
   fetchData: (query: string) => Promise<Tag[]>;
   onChange?: (selectedIds: string[]) => void;
-  maxSelected?: number; // zero or undefined means no limit
-  name?: string; // form field name
+  maxSelected?: number;
+  name?: string;
 };
 
 export function AsyncMultiSelect({
@@ -32,10 +35,16 @@ export function AsyncMultiSelect({
 }: AsyncMultiSelectProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [open, setOpen] = React.useState(false);
-  const [selected, setSelected] = React.useState<Tag[]>(initialSelected);
+  
   const [inputValue, setInputValue] = React.useState("");
   const [options, setOptions] = React.useState<Tag[]>([]);
   const [loading, setLoading] = React.useState(false);
+  const [selected, setSelected] = React.useState<Tag[]>([]);
+
+  useEffect(()=>{
+    getTagsByIds(initialSelected).then(setSelected);
+  },[initialSelected])
+  
 
   const handleUnselect = React.useCallback(
     (tag: Tag) => {
@@ -109,7 +118,7 @@ export function AsyncMultiSelect({
         <div className="flex flex-nowrap items-center gap-1 overflow-x-auto max-h-[40px]">
           {selected.map((tag) => (
             <Badge key={tag.id} variant="secondary" className="flex-shrink-0">
-              {tag.name}
+              {capitalize(tag.name)}
               <button
                 className="ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2"
                 onMouseDown={(e) => {
@@ -155,7 +164,7 @@ export function AsyncMultiSelect({
                       onSelect={() => handleSelect(tag)}
                       className="cursor-pointer"
                     >
-                      {tag.name}
+                      {capitalize(tag.name)}
                     </CommandItem>
                   ))}
               </CommandGroup>

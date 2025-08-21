@@ -27,12 +27,12 @@ export default async function CommunityBlogsPage({ searchParams }: { searchParam
       });
 
   if (!response.success) {
-    console.error(response.error.message);
+    console.error(response.error?.message);
     return <div className="text-red-500 p-4">Failed to load blogs.</div>;
   }
 
 
   return (
-    <BlogsIndex blogs={response?.data} count={response?.count || 0} searchParams={params} onSubmit={fetchBlogs}/>
+    <BlogsIndex blogs={response?.data} count={response?.count || 0} searchParams={params} onSubmit={fetchBlogs} showStatusField={false}/>
   );
 }

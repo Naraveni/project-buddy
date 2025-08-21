@@ -15,9 +15,8 @@ export function formatSlugToTitle(slug: string): string {
     .join(' ');
 }
 
-export function normalizeString(input: string){
-
-  
+export function capitalize(val: string){
+  return val.charAt(0).toUpperCase() + val.slice(1);
 }
 
 export function stringToColor(str: string) {

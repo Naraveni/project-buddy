@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { getTags } from '@/lib/queries';
 
 import { AsyncMultiSelect } from '../ui/multiselect';
+import { capitalize } from '@/lib/utils';
 
 
 const blogCategories = [
@@ -27,24 +28,24 @@ const blogCategories = [
 
 const statuses = ['draft', 'published'] as const;
 
-const tags = ['React', 'Next.js', 'Rails', 'TypeScript', 'AI', 'Design'];
-
 type BlogFiltersProps = {
   searchParams?: {
     title?: string;
     category?: (typeof blogCategories)[number];
     status?: (typeof statuses)[number];
     tags?: string[] | string;
+    showStatusField?: boolean;
   };
   onSubmit: (formData: FormData) => Promise<void>;
 };
 
-export function BlogFilters({ searchParams = {}, onSubmit }: BlogFiltersProps) {
-  const initialTags = Array.isArray(searchParams.tags)
-    ? searchParams.tags
-    : searchParams.tags
-    ? [searchParams.tags]
-    : [];
+export function BlogFilters({ searchParams = {}, onSubmit, showStatusField = true }: BlogFiltersProps) {
+  const initialSelected = Array.isArray(searchParams?.tags)
+  ? searchParams.tags
+  : searchParams?.tags
+  ? searchParams.tags.split(",").map(t => t.trim()).filter(Boolean)
+  : [];
+  console.log(searchParams);
 
   return (
     <form action={onSubmit} className="mb-4 flex gap-2 items-stretch flex-wrap">
@@ -69,14 +70,16 @@ export function BlogFilters({ searchParams = {}, onSubmit }: BlogFiltersProps) {
             <SelectValue placeholder="Select category" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value=" ">None</SelectItem>
             {blogCategories.map((cat) => (
               <SelectItem key={cat} value={cat}>
-                {cat}
+                {capitalize(cat)}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
+      { showStatusField &&
       <div className="flex flex-col gap-1">
         
         <Select
@@ -88,16 +91,18 @@ export function BlogFilters({ searchParams = {}, onSubmit }: BlogFiltersProps) {
             <SelectValue placeholder="Select status" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value=" ">None</SelectItem>
             {statuses.map((status) => (
               <SelectItem key={status} value={status}>
-                {status}
+                {capitalize(status)}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
+      }
       <div className="sm:col-span-2 lg:col-span-3 flex flex-col gap-1">
-        <AsyncMultiSelect fetchData={getTags} maxSelected={4} />
+        <AsyncMultiSelect fetchData={getTags} maxSelected={4} initialSelected={initialSelected}/>
         {4 > 0 && (
     <p className="text-xs text-muted-foreground mt-1">
       You can select up to 4 tags

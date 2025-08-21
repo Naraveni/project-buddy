@@ -1,3 +1,4 @@
+import { Database } from "./database.types";
 
 
 export interface Experience {
@@ -209,6 +210,7 @@ export interface Blog {
   id: string,
   title: string,
   content: string,
+  user_name?:string
   tags: Tag[],
   category: | "frontend"
     | "backend"
@@ -231,7 +233,10 @@ export interface Blog {
     }
 }
 
-export type Tag = { id: string | null; name: string };
+export type Tag = Pick<
+  Database['public']['Tables']['tags']['Row'],
+  'id' | 'name'
+>;
 
 export type blogFormData = {
   id?: string,
