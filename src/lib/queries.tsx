@@ -1,9 +1,9 @@
 'use server';
 import { createSupabaseServerClient } from "@/utils/supabase/server-client";
 
-import { Blog, Tag } from "./types";
+import { Blog, ChatMessage } from "./types";
 import { createSupabaseBrowserClient } from "@/utils/supabase/browser-client";
-import { PostgrestError } from "@supabase/supabase-js";
+
 import { ReactionRow } from "./types";
 import { redirect } from "next/navigation";
 import { Database } from "./database.types";
@@ -262,5 +262,38 @@ export async function getReactions(blog_id: string): Promise<JSON> {
   if (error) {
     return JSON.parse("");
   }
+  return data;
+}
+
+
+
+
+export async function getMessagesOnScroll({
+  chatId,
+  oldestMessageCreatedAt,
+  limit = 25,
+}: {
+  chatId: string;
+  oldestMessageCreatedAt?: string; // ISO timestamp of oldest loaded message
+  limit?: number;
+}):Promise<ChatMessage[] > {
+  if (!chatId) return [];
+  const supabase = await createSupabaseBrowserClient()
+
+  let query =  supabase
+    .from('messages')
+    .select('id, text, sender_id, chat_id, created_at')
+    .eq('chat_id', chatId)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (oldestMessageCreatedAt) {
+    query = query.lt('created_at', oldestMessageCreatedAt);
+  }
+
+  const { data, error } = await query;
+
+  if (error) return [];
+
   return data;
 }

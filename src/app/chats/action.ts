@@ -32,20 +32,21 @@ export async function getUserChats(): Promise<(Chat & { unread_count: number })[
 
   const { data: allMessagesRaw, error: msgError } = await supabase
     .from('messages')
-    .select('id, text, sender_id, chat_id, created_at, user:sender_id(username) ')
+    .select('id, text, sender_id, chat_id, created_at ')
     .in('chat_id', chatIds)
-    .order('created_at', { ascending: true }).limit(25);
+    .order('created_at', { ascending: false }).limit(25);
   
   const allMessages: ChatMessage[] = (allMessagesRaw ?? []).map((msg) => ({
     ...msg,
-    user: Array.isArray(msg.user) ? msg.user[0] : msg.user,
-  }));
+  })).reverse();
+
+  
 
   if (msgError) {
     console.warn('Failed to fetch messages:', msgError.message);
   }
 
-  // Group messages per chat (keep only last 12)
+  
   const groupedMessages: Record<string, ChatMessage[]> = {};
   for (const msg of allMessages ?? []) {
     if (!msg.chat_id) {
@@ -74,7 +75,7 @@ export async function getUserChats(): Promise<(Chat & { unread_count: number })[
     (participants ?? []).map((p) => [p.chat_id, new Date(p.last_seen_at)])
   );
 
-  // Count unread messages per chat
+  
   const unreadCountMap = new Map<string, number>();
 
   for (const chat of chats) {

@@ -36,7 +36,6 @@ export async function sendMessage(formData: FormData) {
       console.error('Insert failed:', insertError.message, insertError.details, insertError.hint);
       return { error: 'Failed to send message.' };
     }
-    revalidatePath(`/chats/${chat_id}`);
 
     return { success: true };
   } catch (err) {

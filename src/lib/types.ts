@@ -31,9 +31,6 @@ export interface Experience {
   sender_id: string;
   chat_id: string;
   created_at: string;
-  user?: {
-    username: string;
-  };
 }
 
 export interface Chat {

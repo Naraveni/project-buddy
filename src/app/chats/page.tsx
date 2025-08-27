@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { createSupabaseBrowserClient } from "@/utils/supabase/browser-client";
 import { RealtimeChannel } from "@supabase/supabase-js";
 import {
@@ -31,6 +31,8 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
+  const currentChatRef = useRef<string>(currentChat?.id || '')
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -42,6 +44,11 @@ export default function ChatPage() {
     };
     fetchUser();
   }, []);
+
+
+  useEffect(() => {
+  currentChatRef.current = currentChat?.id || '';
+}, [currentChat]);
 
   useEffect(() => {
     const fetchChats = async () => {
@@ -85,10 +92,10 @@ export default function ChatPage() {
   }, [currentChat]);
 
   useEffect(() => {
-    if (!currentChat?.id || ChatIds.length === 0) return;
+    if (!currentChatRef.current || ChatIds.length === 0) return;
     let sub: RealtimeChannel;
 
-    subscribeToMessages(ChatIds, currentChat.id, (msg) => {
+    subscribeToMessages(ChatIds, currentChatRef.current, (msg) => {
       setChats((prevChats) => {
         const updatedChats = prevChats.map((chat) => {
           if (chat.id !== msg.chat_id) return chat;
@@ -96,7 +103,7 @@ export default function ChatPage() {
           const updatedChat = { ...chat };
           updatedChat.messages = [...(updatedChat.messages || []), msg];
 
-          if (currentChat.id !== msg.chat_id) {
+          if (currentChatRef.current !== msg.chat_id) {
             updatedChat.unread_count = (updatedChat.unread_count || 0) + 1;
           }
 
@@ -118,14 +125,14 @@ export default function ChatPage() {
     return () => {
       sub?.unsubscribe();
     };
-  }, [currentChat, ChatIds]);
+  }, [ChatIds]);
 
   const requestsForMe = chats.filter((chat) => chat.user_owner_id === userId);
   const myRequests = chats.filter((chat) => chat.user_owner_id !== userId);
 
-  const handleChatClick = (chat: Chat) => {
+  const handleChatClick = async (chat: Chat) => {
     setCurrentChat(chat);
-    updateLastSeenTime(chat.id);
+    await updateLastSeenTime(chat.id);
     setChats((prevChats) =>
       prevChats.map((c) => (c.id === chat.id ? { ...c, unread_count: 0 } : c))
     );
@@ -133,7 +140,6 @@ export default function ChatPage() {
 
   return (
     <div className="w-full h-[calc(100vh-4rem)] lg:grid-cols-[20%_1fr] pt-4 flex">
-      {/* Left Sidebar */}
       <aside className="w-1/4 border-r flex flex-col px-3 py-2 bg-gray-100 shadow-sm">
         <h4 className="text-lg font-semibold mb-4 pb-2  border-gray-300">
           Conversations
@@ -261,7 +267,8 @@ export default function ChatPage() {
         </ExpandableChatHeader>
 
         <div className="flex flex-col flex-1 overflow-hidden rounded-xl shadow bg-white">
-          <ExpandableChatBody className="flex-1 overflow-y-auto p-4">
+          <div className="flex-1 overflow-y-auto p-4"  ref={scrollRef}>
+            
             {loading ? (
               <div className="flex items-center justify-center h-full">
                 <PulseLoader />
@@ -286,7 +293,7 @@ export default function ChatPage() {
                         .{" "}
                         {message.sender_id === userId
                           ? "You"
-                          : message.user?.username || "Unknown User"}
+                          : currentChat.user?.username || "Unknown User"}
                       </p>
                     </div>
                   </div>
@@ -295,7 +302,7 @@ export default function ChatPage() {
             ) : (
               <p>No chats found.</p>
             )}
-          </ExpandableChatBody>
+          </div>
 
           <ExpandableChatFooter className="border-t p-2">
             <ChatInput chat_id={currentChat?.id} disabled={!currentChat} />
