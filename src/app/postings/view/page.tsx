@@ -6,7 +6,7 @@ import Link from "next/link";
 import { formatSlugToTitle } from "@/lib/utils";
 import PostingsFilter from "@/components/postings/filter";
 import { getUserPostings } from "./action";
-import { getUserProjectsList, getUser } from "@/lib/queries";
+import {  getUser } from "@/lib/queries";
 import ChatFormClient from "@/components/postings/chatForm";
 import { MdEdit } from "react-icons/md";
 import { GrView } from "react-icons/gr";
@@ -59,8 +59,6 @@ export default async function MyPostingsPage({
     end_date: end_date,
     view_mode: view_mode,
   });
-
-  const projects = await getUserProjectsList();
   const totalPages = Math.ceil((count ?? 0) / perPage);
 
   const user = await getUser();
@@ -69,7 +67,6 @@ export default async function MyPostingsPage({
     <main className="w-full h-[calc(100vh-3rem)] grid lg:grid-cols-[20%_1fr] pt-2">
       <div className="px-4 border-r border-gray-300 overflow-y-auto">
         <PostingsFilter
-          projects={projects}
           currentValues={{
             project_id: project_id,
             status: status,

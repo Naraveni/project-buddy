@@ -18,6 +18,14 @@ const ChatInput = React.forwardRef<HTMLTextAreaElement, ChatInputProps>(
     const [error, setError] = React.useState<string | null>(null);
     const [isSending, setIsSending] = React.useState(false);
 
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault(); // prevent newline
+    handleSend(); // call your send function
+  }
+};
+
+
     const handleSend = async () => {
       if (!text.trim()) {
         setError("Message cannot be empty.");
@@ -56,6 +64,7 @@ const ChatInput = React.forwardRef<HTMLTextAreaElement, ChatInputProps>(
             value={text}
             onChange={(e) => setText(e.target.value)}
             aria-invalid={!!error}
+            onKeyDown={handleKeyDown}
             placeholder="Type your message..."
             className={cn(
               "max-h-32 px-4 py-3 bg-white text-sm placeholder:text-muted-foreground border border-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50 w-full rounded-md resize-none shadow-sm",

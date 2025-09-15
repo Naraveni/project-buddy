@@ -23,7 +23,7 @@ export default function FileUploader({ imageUrl, folder, onUpload }: FileUploade
   const [fileName, setfileName] = useState<string>('');
   const { toast } = useToast();
   const supabase = createClient();
-  const bucket = process.env.NEXT_BUCKET_NAME || '';
+  const bucket = process.env.NEXT_PUBLIC_BUCKET_NAME || '';
 
   
   useEffect(() => {
@@ -45,6 +45,7 @@ export default function FileUploader({ imageUrl, folder, onUpload }: FileUploade
   }, [imageUrl, bucket, supabase]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("Here")
     const file = e.target.files?.[0];
     if (!file || !userId) return;
 

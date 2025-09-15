@@ -2,7 +2,7 @@
 
 import { createSupabaseServerClient } from '@/utils/supabase/server-client';
 import { redirect } from 'next/navigation';
-import { getUserProjects } from '../projects/me/action';
+import { getProjects } from '../projects/me/action';
 import { Project } from '@/lib/types';
 
 export async function getProfileData() {
@@ -50,7 +50,7 @@ export async function getProfileData() {
     }));
 
   // Fetch user projects
-  const projectsResult = await getUserProjects(1, 20, '');
+  const projectsResult = await getProjects(1, 20, '');
   const projects = (projectsResult.projects ?? []) as Project[];
 
   return { profile, skills: skillObjects, error: null, projects };

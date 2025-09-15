@@ -3,11 +3,13 @@ import { createSupabaseServerClient } from '@/utils/supabase/server-client';
 import { redirect } from 'next/navigation';
 import { Project } from '@/lib/types';
 import { getSignedImageUrl } from '@/lib/storage';
+import { PROJECT_STATUS } from '@/utils/constants';
 
-export async function getUserProjects(
+export async function getProjects(
   page: number = 1,
   perPage: number = 10,
-  name?: string
+  name?: string,
+  community: boolean = false
 ): Promise<{ projects: Project[]; errors?: Record<string, string[]>; count: number }> {
   const supabase = await createSupabaseServerClient();
   const {
@@ -29,11 +31,18 @@ export async function getUserProjects(
       { count: 'exact' }
     )
     .eq('user_id', user.id)
-    .order('created_at', { ascending: false })
+
+  if(community){
+    query = query.eq('status',PROJECT_STATUS['PUBLISHED'])
+  }
+  else{
+    query = query.eq('user_id', user?.id)
+  }
+  query = query.order('created_at', { ascending: false })
     .range(from, to);
 
   if (name) {
-    query = query.ilike('name', `%${name}%`); // ✅ Filter by name
+    query = query.ilike('name', `%${name}%`);
   }
 
   const { data, error, count } = await query;

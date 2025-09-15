@@ -43,6 +43,7 @@ export interface Chat {
   name: string;
   messages: ChatMessage[];
   unread_count?: number;
+  last_message?: {text: string};
   user?: {
     username: string;
   }
@@ -258,4 +259,6 @@ export interface BlogReactionsSelectorProps {
   initialSelected?: ReactionRow['response'] ;
   blogId: string
 }
+
+export type ProjectStatus = 'published' | 'draft' | 'archived';
 

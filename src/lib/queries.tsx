@@ -297,3 +297,12 @@ export async function getMessagesOnScroll({
 
   return data;
 }
+
+export async function searchPojectsByName(name: string): Promise<{id: string, name: string}[]>{
+  const supabase = await createSupabaseBrowserClient();
+  const { data } = await supabase.from('projects').select('id,name')
+  if(data){
+    return data
+  }
+  return [];
+}

@@ -1,5 +1,5 @@
 
-
+import { ProjectStatus } from "@/lib/types";
 
 type providerType = { id: string, name: string }[]
 export const AUTH_PROVIDERS: providerType = [
@@ -24,3 +24,5 @@ export const blog_reactions  = [
 export const PROJECT_BUCKET_IMAGE_PATH = 'project_logo';
 export const LOGO_NAME = "https://vsmfojarkowcnfobdgze.supabase.co/storage/v1/object/public/projectbuddypublic//project-buddy.svg";
 export const EDIT_ICON = "https://vsmfojarkowcnfobdgze.supabase.co/storage/v1/object/public/projectbuddypublic//edit-icon-2048x2048-6svwfwto.png";
+
+export const PROJECT_STATUS: Record<string, string> = {'DRAFT': 'draft', 'ARCHIVED': 'archived','PUBLISHED': 'published'};
