@@ -1,7 +1,6 @@
 'use server';
 
 import { createSupabaseServerClient } from '@/utils/supabase/server-client';
-import { revalidatePath } from 'next/cache';
 
 export async function sendMessage(formData: FormData) {
   try {

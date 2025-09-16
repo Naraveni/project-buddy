@@ -252,6 +252,7 @@ export async function getCurUserReactions(
   if (data && data.length && data[0].response) {
     return data[0].response;
   }
+  return [];
 }
 
 export async function getReactions(blog_id: string): Promise<JSON> {
@@ -300,7 +301,7 @@ export async function getMessagesOnScroll({
 
 export async function searchPojectsByName(name: string): Promise<{id: string, name: string}[]>{
   const supabase = await createSupabaseBrowserClient();
-  const { data } = await supabase.from('projects').select('id,name')
+  const { data } = await supabase.from('projects').select('id,name').ilike('name', `%${name}%`).limit(10);
   if(data){
     return data
   }

@@ -1,14 +1,9 @@
 import { getBlogs } from '@/lib/queries';
-import { getUser } from '@/lib/queries';
-
 import BlogsIndex from '@/components/blog/blogIndex';
-import { SearchParams } from 'next/dist/server/request/search-params';
 import fetchBlogs from './action';
 
-export default async function CommunityBlogsPage({ searchParams }: { searchParams: SearchParams }) {
+export default async function CommunityBlogsPage({ searchParams }: { searchParams: Promise<any> }) {
     const params = await searchParams;
-      const user = await getUser();
-      const id = user?.id;
       const pageParam = params.page;
     const page = Array.isArray(pageParam)
       ? parseInt(pageParam[0] ?? "1", 10)

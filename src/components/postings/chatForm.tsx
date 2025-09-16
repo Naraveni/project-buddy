@@ -4,15 +4,14 @@ import { useActionState } from 'react';
 import { createChatForPosting } from '@/app/postings/view/create-chat-action';
 import { IoChatboxEllipsesOutline } from 'react-icons/io5';
 import { Button } from '@/components/ui/button';
+import { ChatState } from '@/lib/types';
 
 export default function ChatFormClient({ postingId }: { postingId: string }) {
   const [state, formAction] = useActionState(
-    async (state, formData: FormData) => await createChatForPosting(formData),
+    async (state: ChatState, formData: FormData) => await createChatForPosting(formData),
     {
       success: false,
       errors: [],
-      chatId: undefined,
-      message: undefined,
     }
   );
 
@@ -21,10 +20,7 @@ export default function ChatFormClient({ postingId }: { postingId: string }) {
       
 <div className=' top-4 right-4 flex gap-2 items-center'>
       {state?.errors && state.errors.length > 0 && (
-        <div className="text-red-500">{state.errors.join(', ')}</div>
-      )}
-      {state.success && (
-        <p className="text-green-600">{state.message}</p>
+        <div className="text-red-500">Something Went Wrong Please Try Again</div>
       )}
       <input type="hidden" name="postingId" value={postingId} />
        <Button

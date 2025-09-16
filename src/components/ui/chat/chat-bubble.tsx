@@ -3,9 +3,8 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import MessageLoading from "./message-loading";
-import { Button, ButtonProps } from "../button";
+import { Button, buttonVariants } from "../button";
 
-// ChatBubble
 const chatBubbleVariant = cva(
   "flex gap-2 max-w-[60%] items-end relative group",
   {
@@ -141,7 +140,7 @@ const ChatBubbleTimestamp: React.FC<ChatBubbleTimestampProps> = ({
 );
 
 // ChatBubbleAction
-type ChatBubbleActionProps = ButtonProps & {
+type ChatBubbleActionProps = React.ComponentProps<"button"> & VariantProps<typeof buttonVariants> & {
   icon: React.ReactNode;
 };
 

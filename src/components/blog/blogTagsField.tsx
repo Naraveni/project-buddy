@@ -62,7 +62,7 @@ export function TagsAutocomplete({ initialSelected = [], showAddTags = true }: T
 
   const handleCreateNewTag = () => {
     if (query.trim().length > 0) {
-      addTag({ id: null, name: query.trim() });
+      addTag({ id: '', name: query.trim() });
     }
   };
 

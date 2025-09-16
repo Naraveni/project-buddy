@@ -35,21 +35,17 @@ export async function getProfileData() {
     .select('skill_id, skills(name)')
     .eq('profile_id', user.id);
 
-  type SkillRow = {
-    skill_id: string;
-    skills: { name: string } | null;
-  };
-
-  const skills = (data ?? []) as SkillRow[];
+  
+  
+  const skills = (data ?? []) as { skill_id: string; skills: { name: string }[] | null }[];
 
   const skillObjects = skills
     .filter((s) => s.skills !== null)
     .map((s) => ({
       id: s.skill_id,
-      name: s.skills!.name,
+      name: s.skills && s.skills[0].name,
     }));
 
-  // Fetch user projects
   const projectsResult = await getProjects(1, 20, '');
   const projects = (projectsResult.projects ?? []) as Project[];
 

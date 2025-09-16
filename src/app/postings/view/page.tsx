@@ -20,21 +20,12 @@ import {
   Building,
 } from "lucide-react";
 
-interface SearchParams {
-  page?: string;
-  project_id?: string;
-  status?: string;
-  mode?: string;
-  start_date?: string;
-  end_date?: string;
-  view_mode?: string;
-  errors?: string[];
-}
+
 
 export default async function MyPostingsPage({
   searchParams,
 }: {
-  searchParams: SearchParams;
+  searchParams: Promise<any>;
 }) {
   const {
     project_id,

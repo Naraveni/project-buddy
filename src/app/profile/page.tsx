@@ -66,13 +66,13 @@ export default async  function ProfilePage() {
         </div>
       )}
 
-      {skills.length > 0 && (
+      { skills && skills.length > 0 && (
         <div className="flex flex-wrap gap-2 mt-4">
           {skills.map((skill, i) => (
             <span
               key={i}
               className="text-xs px-3 py-1 rounded-full text-white shadow"
-              style={{ backgroundColor: stringToColor(skill.name) }}
+              style={{ backgroundColor: stringToColor(skill?.name || '') }}
             >
               {skill?.name}
             </span>

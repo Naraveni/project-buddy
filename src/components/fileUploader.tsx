@@ -20,7 +20,7 @@ export default function FileUploader({ imageUrl, folder, onUpload }: FileUploade
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
-  const [fileName, setfileName] = useState<string>('');
+  //const [fileName, setfileName] = useState<string>('');
   const { toast } = useToast();
   const supabase = createClient();
   const bucket = process.env.NEXT_PUBLIC_BUCKET_NAME || '';
@@ -61,7 +61,7 @@ export default function FileUploader({ imageUrl, folder, onUpload }: FileUploade
       toast({ title: 'File too large', description: 'Max size is 5MB.', variant: 'destructive' });
       return;
     }
-    setfileName(file.name);
+    //setfileName(file.name);
     const fileExt = file.name.split('.').pop();
     const filePath = `${userId}/${folder}/${crypto.randomUUID()}.${fileExt}`;
 

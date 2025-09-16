@@ -10,10 +10,7 @@ import {
 } from "@/components/ui/select";
 
 
-interface Project {
-  id: string;
-  name: string;
-}
+
 
 interface PostingsFilterProps {
   currentValues: {

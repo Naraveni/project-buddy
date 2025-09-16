@@ -4,11 +4,12 @@ export default async function BlogMetaData({
   params,
   searchParams,
 }: {
-  params: { id: string };
-  searchParams?: Record<string, string>;
-}): Promise<React.JSX.Element> {
-  const blogId = (await params)?.id;
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<Record<string, string>>;
+}) {
+  const blogId = await params.then((p) => p.id);
   const blog = await getBlogById(blogId);
+  const awaitedSearchParams = await searchParams;
 
-  return <BlogMetadataForm searchParams={searchParams} blog={blog ?? undefined} />;
+  return <BlogMetadataForm searchParams={awaitedSearchParams} blog={blog ?? undefined} />;
 }

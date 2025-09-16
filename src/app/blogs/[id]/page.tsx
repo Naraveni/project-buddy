@@ -5,10 +5,10 @@ import { iconMap, formatLabel } from '@/lib/blog_reactions';
 
 import BlogReactionsSection from '@/components/blog/blogReactionSelectorWrapper';
 interface ViewBlogProps {
-  params: { id: string };
-  searchParams: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{
     error: string
-  }
+  }>
 }
 
 export default async function ViewBlog({ params, searchParams }: ViewBlogProps) {
@@ -46,7 +46,7 @@ export default async function ViewBlog({ params, searchParams }: ViewBlogProps) 
           className="flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium border bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200"
         >
           {formatLabel(reaction)}
-          {iconMap[reaction]()}
+          {iconMap[reaction as keyof typeof iconMap]()}
           <span>{count}</span>
         </div>
       ))}

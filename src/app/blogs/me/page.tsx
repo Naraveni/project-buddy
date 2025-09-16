@@ -1,10 +1,10 @@
 import { getBlogs,getUser } from '@/lib/queries';
 
 import BlogsIndex from '@/components/blog/blogIndex';
-import { SearchParams } from 'next/dist/server/request/search-params';
+
 import fetchBlogs from './action';
 
-export default async function BlogsPage({ searchParams }: { searchParams: SearchParams }) {
+export default async function BlogsPage({ searchParams }: { searchParams: Promise<any> }) {
   const params = await searchParams;
   const user = await getUser();
   const id = user?.id;

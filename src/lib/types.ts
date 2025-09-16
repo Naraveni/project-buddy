@@ -262,3 +262,10 @@ export interface BlogReactionsSelectorProps {
 
 export type ProjectStatus = 'published' | 'draft' | 'archived';
 
+export interface ChatState {
+  success: boolean;
+  errors: string[];
+  chatId?: string;
+  message?: string;
+}
+

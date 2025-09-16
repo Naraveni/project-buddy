@@ -2,12 +2,13 @@
 import BlogMetadataForm from "@/components/blog/blogMetaDataForm";
 
 
-export default function BlogMetaData({
+export default async function BlogMetaData({
   searchParams,
 }: {
-  searchParams?: Record<string, string>;
+  searchParams?: Promise<Record<string, string>>;
 }){
+  const awaitedSearchParams =  await searchParams;
   return(
-    <BlogMetadataForm searchParams={searchParams}/>
+    <BlogMetadataForm searchParams={awaitedSearchParams}/>
   )
 }

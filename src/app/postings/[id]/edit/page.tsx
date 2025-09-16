@@ -2,8 +2,8 @@ import { redirect } from 'next/navigation';
 import { getUserProjectsList, getPostingById } from '@/lib/queries';
 import PostingFormPage from '@/components/postings/posting_form';
 
-export default async function EditPostingPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default async function EditPostingPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
 
   const [posting, projects] = await Promise.all([
     getPostingById(id),

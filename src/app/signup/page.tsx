@@ -61,9 +61,9 @@ import ProfileFormPage from '@/components/profileForm';
 export default async function ProfilePage({
   searchParams,
 }: {
-  searchParams: { errors?: string };
+  searchParams: Promise<{ errors?: string }>;
 }) {
-  const { profile, skills, _error } = await getProfileData();
+  const { profile, skills } = await getProfileData();
 
 
   const searchParam = await searchParams;

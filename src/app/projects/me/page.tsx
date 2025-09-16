@@ -3,10 +3,10 @@ import ProjectsIndexPage from '@/components/projects/projectIndex';
 export default async function MyProjectsPage({
   searchParams,
 }: {
-  searchParams: { page?: string; name?: string };
+  searchParams: Promise<{ page?: string; name?: string }>;
 }) {
-
-  const page = Math.max(1, parseInt(searchParams.page ?? '1', 10));
+const searchParamsResolved = await searchParams;
+  const page = Math.max(1, parseInt(searchParamsResolved.page ?? '1', 10));
   const perPage = 10;
   const params = await searchParams;
   const searchName = params.name ?? '';
@@ -14,6 +14,6 @@ export default async function MyProjectsPage({
   const { projects, errors, count } = await getProjects(page, perPage, searchName);
 
   return (
-    <ProjectsIndexPage searchParams={searchParams} projects={projects} errors={errors} count={count} />
+    <ProjectsIndexPage searchParams={searchParamsResolved} projects={projects} errors={errors} count={count} />
   );
 }

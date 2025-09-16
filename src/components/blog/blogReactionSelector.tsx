@@ -36,12 +36,12 @@ export default function BlogReactionsSelector({
       <p className="text-sm">How did this article help you?</p>
       <div className="flex flex-wrap gap-3 pt-2">
         {blog_reactions.map((reaction) => {
-          const isSelected = selected.includes(reaction);
+          const isSelected = selected.includes(reaction as keyof typeof iconMap);
           return (
             <button
               key={reaction}
               type="button"
-              onClick={() => toggle(reaction)}
+              onClick={() => toggle(reaction as keyof typeof iconMap)}
               className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium border transition-colors
                 ${
                   isSelected
@@ -49,7 +49,7 @@ export default function BlogReactionsSelector({
                     : 'bg-gray-100 border-gray-300 text-gray-800 hover:bg-gray-200'
                 } }`}
             >
-              {iconMap[reaction]()}
+              {iconMap[reaction as keyof typeof iconMap]()}
               <span>{formatLabel(reaction)}</span>
               {isSelected && (
                 <svg

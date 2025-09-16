@@ -34,9 +34,10 @@ type BlogFiltersProps = {
     category?: (typeof blogCategories)[number];
     status?: (typeof statuses)[number];
     tags?: string[] | string;
-    showStatusField?: boolean;
+    
   };
   onSubmit: (formData: FormData) => Promise<void>;
+  showStatusField?: boolean;
 };
 
 export function BlogFilters({ searchParams = {}, onSubmit, showStatusField = true }: BlogFiltersProps) {

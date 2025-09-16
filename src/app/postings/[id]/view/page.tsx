@@ -16,8 +16,9 @@ function stringToColor(str: string) {
   return `hsl(${hue}, 70%, 40%)`;
 }
 
-export default async function PostingPage({ params }: { params: { id: string } }) {
-  const posting = await getPostingById(params.id);
+export default async function PostingPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const posting = await getPostingById(id);
   console.log("Posting data:", posting);
 
   const project = await getProjectById(posting.project_id);
