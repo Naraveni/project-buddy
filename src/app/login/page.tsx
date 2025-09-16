@@ -11,6 +11,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const supabaseClient = createClient();
+const OAUTH_REDIRECT_URI = process.env.NEXT_PUBLIC_OAUTH_REDIRECT_URI || "";
 
 const ICONS: Record<string, React.ReactElement> = {
   google: (
@@ -86,7 +87,7 @@ const SignUpPage: React.FC = () => {
     const { error } = await supabaseClient.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: OAUTH_REDIRECT_URI,
       },
     });
 
