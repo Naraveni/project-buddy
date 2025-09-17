@@ -345,6 +345,7 @@ export default function ChatPage() {
                         ? "bg-blue-100 self-end ml-auto"
                         : "bg-gray-100 self-start mr-auto"
                     }`}
+                    
                   >
                     <p className="text-sm">{message.text}</p>
                     <div>
