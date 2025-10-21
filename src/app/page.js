@@ -4,15 +4,15 @@ import Image from "next/image";
 import collabImage from "@/../public/LandingPage/Collab.png";
 import blogImage from "@/../public/LandingPage/Blog.svg";
 import Link from "next/link";
-import { CodeIcon, StarIcon, MessageSquareIcon, PenIcon, UsersIcon } from "lucide-react";
+import { CodeIcon, StarIcon, MessageSquareIcon, PenIcon, UsersIcon, X } from "lucide-react";
 import { LANDING_PAGE_TEXT } from "@/utils/text";
-import { motion, spring } from "framer-motion";
+import { motion } from "framer-motion";
 
 // === Animation Variants ===
 const fadeUp = {
   hidden: { opacity: 0, y: 60 },
   visible: {
-
+opacity: 1,
     transition: { duration: 0.8, ease: "easeInOut" },
   },
 };
@@ -29,6 +29,7 @@ const slideLeft = {
 const slideRight = {
   hidden: { opacity: 0, x: 100 },
   visible: {
+    opacity: 1,
     transition: { duration: 0.9, ease: [0.25, 0.1, 0.25, 1] },
   },
 };
@@ -36,13 +37,17 @@ const slideRight = {
 const zoomIn = {
   hidden: { opacity: 0, scale: 0.9 },
   visible: {
-    transition: { duration: 0.8, type: spring, stiffness: 60 },
+    opacity: 1,
+    scale: 1,
+    x: 0,
+    transition: { duration: 0.8, type: "spring", stiffness: 60 },
   },
 };
 
 const container = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.25 } },
+  visible: {
+    opacity: 1, transition: { staggerChildren: 0.25 } },
 };
 
 // === Icons ===
@@ -134,11 +139,11 @@ export default function LandingPage() {
         className="snap-start h-screen flex flex-col justify-center px-6 bg-black/40"
       >
         <div className="max-w-5xl mx-auto text-center">
-          <motion.h2 variants={fadeUp} className="text-4xl font-bold text-blue-400 mb-12">
+          <motion.h2 variants={fadeUp} className="text-4xl font-bold text-blue-400 mb-24">
             {LANDING_PAGE_TEXT.HOW_IT_WORKS.TITLE}
           </motion.h2>
 
-          <motion.div variants={container} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+          <motion.div variants={container} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 ">
             {LANDING_PAGE_TEXT.HOW_IT_WORKS.STEPS.map((step, index) => (
               <motion.div
                 key={index}
