@@ -18,9 +18,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Project Buddy",
   description: "A place to collaborate and build projects together",
-  icons:{
-    icon: LOGO_NAME
-  }
+  icons: {
+    icon: LOGO_NAME,
+  },
 };
 
 export default function RootLayout({
@@ -31,13 +31,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased scrollbar-hide min-h-screen flex flex-col`}
       >
         <Header />
-        <main className="pt-14">
-        <ToastProvider>
-        {children}
-        </ToastProvider>
+        {/* Main takes up remaining space */}
+        <main className="flex-1 overflow-y-auto">
+          <ToastProvider>{children}</ToastProvider>
         </main>
       </body>
     </html>

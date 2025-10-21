@@ -1,5 +1,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "tailwindcss-intersect";
+
+
+
 
 @custom-variant dark (&:is(.dark *));
 
@@ -146,6 +150,29 @@
   z-index: 10;
 }
 
+html {
+  height: 100%; /* fixes the white flash and white gap */
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  
+  overscroll-behavior: none; /* prevents white rubber-band bounce in Safari */
+}
+.element::-webkit-scrollbar {
+  display: none; /* Hides the scrollbar */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 .ql-container {
   overflow: visible !important;
   position: relative;
@@ -153,4 +180,30 @@
 
 .ql-editor {
   overflow: visible !important;
+}
+
+
+
+
+.animate-on-scroll {
+  opacity: 0;
+  transform: translateY(2rem);
+  transition: opacity 2000ms, transform 2000ms;
+}
+
+
+.animate-on-scroll.intersected {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+.hero-animation {
+  opacity: 0;
+  transform: translateY(-2rem); /* slide-in-from-top-8 */
+  transition: opacity 2000ms, transform 2000ms;
+}
+.hero-animation.intersected {
+  opacity: 1;
+  transform: translateY(0);
 }
