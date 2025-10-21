@@ -6,32 +6,29 @@ import blogImage from "@/../public/LandingPage/Blog.svg";
 import Link from "next/link";
 import { CodeIcon, StarIcon, MessageSquareIcon, PenIcon, UsersIcon } from "lucide-react";
 import { LANDING_PAGE_TEXT } from "@/utils/text";
-import { motion } from "framer-motion";
+import { motion, spring } from "framer-motion";
 
 // === Animation Variants ===
 const fadeUp = {
   hidden: { opacity: 0, y: 60 },
   visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.8, ease: [0.25, 0.1, 0.25, 1] },
+
+    transition: { duration: 0.8, ease: "easeInOut" },
   },
 };
 
 const slideLeft = {
   hidden: { opacity: 0, x: -100 },
   visible: {
-    opacity: 1,
     x: 0,
-    transition: { duration: 0.9, ease: [0.25, 0.1, 0.25, 1] },
+    opacity: 1,
+    transition: { duration: 0.9, ease: "easeInOut" },
   },
 };
 
 const slideRight = {
   hidden: { opacity: 0, x: 100 },
   visible: {
-    opacity: 1,
-    x: 0,
     transition: { duration: 0.9, ease: [0.25, 0.1, 0.25, 1] },
   },
 };
@@ -39,9 +36,7 @@ const slideRight = {
 const zoomIn = {
   hidden: { opacity: 0, scale: 0.9 },
   visible: {
-    opacity: 1,
-    scale: 1,
-    transition: { duration: 0.8, type: "spring", stiffness: 60 },
+    transition: { duration: 0.8, type: spring, stiffness: 60 },
   },
 };
 
@@ -122,7 +117,7 @@ export default function LandingPage() {
               whileHover={{ scale: 1.05 }}
               className="flex flex-col items-center text-center p-8 rounded-2xl bg-gradient-to-b from-gray-900/40 to-gray-800/10 border border-gray-800 hover:border-blue-700/40 transition-all backdrop-blur-sm shadow-md hover:shadow-blue-900/20"
             >
-              {ICONS[feature.ICON as keyof typeof ICONS]}
+              {ICONS[feature.ICON]}
               <h3 className="mt-4 text-xl font-semibold text-white">{feature.TITLE}</h3>
               <p className="mt-2 text-gray-400 text-base">{feature.DESCRIPTION}</p>
             </motion.div>
