@@ -14,6 +14,7 @@
     "@blocknote/mantine": "^0.35.0",
     "@blocknote/react": "^0.35.0",
     "@hookform/resolvers": "^5.1.1",
+    "@midudev/tailwind-animations": "^0.2.0",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-checkbox": "^1.3.2",
     "@radix-ui/react-collapsible": "^1.1.11",
@@ -49,18 +50,21 @@
     "react-spinners": "^0.17.0",
     "sonner": "^2.0.5",
     "tailwind-merge": "^3.3.0",
+    "tailwindcss-intersect": "^2.2.0",
     "uuid": "^11.1.0",
     "zod": "^3.25.65"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@tailwindcss/postcss": "^4",
+    "@tailwindcss/postcss": "^4.1.15",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "autoprefixer": "^10.4.21",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
-    "tailwindcss": "^4",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.15",
     "tw-animate-css": "^1.3.4",
     "typescript": "^5"
   }

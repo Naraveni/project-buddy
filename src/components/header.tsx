@@ -25,7 +25,7 @@ export default async function Header() {
   } = await supabase.auth.getUser();
 
   return (
-    <header className="fixed top-0 left-0 w-full z-50 bg-black border-b border-white">
+    <header className="fixed top-0 left-0 w-full z-50 bg-black ">
       <div className="w-full max-w-10xl px-4 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0">
         <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-6 space-y-2 sm:space-y-0">
           <Link
