@@ -29,25 +29,17 @@ export async function getProfileData() {
     return { profile: null}
   }
 
-  // Fetch user skills
-  const { data } = await supabase
+  const ids = await supabase
     .from('profile_skills')
-    .select('skill_id, skills(name)')
+    .select('id:skill_id')
     .eq('profile_id', user.id);
 
-  
-  
-  const skills = (data ?? []) as { skill_id: string; skills: { name: string }[] | null }[];
+  const skillIds = ids.data?.map((item) => item.id) || [];
 
-  const skillObjects = skills
-    .filter((s) => s.skills !== null)
-    .map((s) => ({
-      id: s.skill_id,
-      name: s.skills && s.skills[0].name,
-    }));
+  const { data } = await supabase.from('skills').select('id, name').in('id', skillIds);
+  
 
   const projectsResult = await getProjects(1, 20, '');
   const projects = (projectsResult.projects ?? []) as Project[];
-
-  return { profile, skills: skillObjects, error: null, projects };
+  return { profile, skills: data, error: null, projects };
 }

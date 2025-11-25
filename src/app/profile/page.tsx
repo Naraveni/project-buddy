@@ -14,6 +14,7 @@ import {
   FaProjectDiagram
 } from 'react-icons/fa';
 import { Experience, Education } from '@/lib/types';
+import { formatSlugToTitle } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -74,7 +75,7 @@ export default async  function ProfilePage() {
               className="text-xs px-3 py-1 rounded-full text-white shadow"
               style={{ backgroundColor: stringToColor(skill?.name || '') }}
             >
-              {skill?.name}
+              {formatSlugToTitle(skill?.name)}
             </span>
           ))}
         </div>
@@ -90,7 +91,7 @@ export default async  function ProfilePage() {
               <div key={idx} className="p-4 bg-white rounded-lg shadow hover:shadow-lg transition  w-full max-w-full border-gray-100 border-2">
                 <p className="font-semibold text-lg text-gray-900 truncate">Project Name: {proj.name}</p>
                 Description
-                <p className="text-sm text-gray-600  text-wrap">{proj.description}</p>
+                <p className="text-sm text-gray-600 wrap-break-word">{proj.description}</p>
               </div>
             ))}
           </div>

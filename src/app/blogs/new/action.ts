@@ -45,13 +45,11 @@ export default async function upsertBlog(formData: FormData) {
   } = await supabase.auth.getUser();
   const userId = user?.id;
 
-  console.log("USER ID:", userId);
-  console.log("RAW FORM DATA:", raw);
-  console.log("PARSED FORM DATA:", parsed);
+  
 
   if (!parsed.success) {
     const zodErrors = parsed.error.flatten().fieldErrors;
-    console.log("ZOD VALIDATION ERRORS:", zodErrors);
+    
 
     await supabase.from("form_drafts").insert({
       id: draftId,

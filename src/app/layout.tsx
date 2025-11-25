@@ -34,8 +34,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased scrollbar-hide min-h-screen flex flex-col`}
       >
         <Header />
-        {/* Main takes up remaining space */}
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto mt-12">
           <ToastProvider>{children}</ToastProvider>
         </main>
       </body>

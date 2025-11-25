@@ -4,7 +4,7 @@ import { useRef, useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/supabase-client';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/useToast';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { FileIcon } from 'lucide-react';
 
@@ -20,7 +20,6 @@ export default function FileUploader({ imageUrl, folder, onUpload }: FileUploade
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
-  //const [fileName, setfileName] = useState<string>('');
   const { toast } = useToast();
   const supabase = createClient();
   const bucket = process.env.NEXT_PUBLIC_BUCKET_NAME || '';
@@ -40,8 +39,10 @@ export default function FileUploader({ imageUrl, folder, onUpload }: FileUploade
   
   useEffect(() => {
     if (!imageUrl) return;
-    const { data } = supabase.storage.from(bucket).getPublicUrl(imageUrl);
-    if (data?.publicUrl) setPreviewUrl(data.publicUrl);
+    (async () => {
+      const { data } = await supabase.storage.from(bucket).createSignedUrl(imageUrl, 300);
+      if (data?.signedUrl) setPreviewUrl(data.signedUrl);
+    })();
   }, [imageUrl, bucket, supabase]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,7 +62,6 @@ export default function FileUploader({ imageUrl, folder, onUpload }: FileUploade
       toast({ title: 'File too large', description: 'Max size is 5MB.', variant: 'destructive' });
       return;
     }
-    //setfileName(file.name);
     const fileExt = file.name.split('.').pop();
     const filePath = `${userId}/${folder}/${crypto.randomUUID()}.${fileExt}`;
 
@@ -72,9 +72,10 @@ export default function FileUploader({ imageUrl, folder, onUpload }: FileUploade
     if (error) {
       toast({ title: 'Upload failed', description: error.message, variant: 'destructive' });
     } else {
-      const { data } = supabase.storage.from(bucket).getPublicUrl(filePath);
-      if (data?.publicUrl) {
-        setPreviewUrl(data.publicUrl);
+      const { data } = await supabase.storage.from(bucket).createSignedUrl(filePath, 300);
+      console.log(data,'Signed URL Data');
+      if (data?.signedUrl) {
+        setPreviewUrl(data.signedUrl);
         toast({ title: 'Upload successful', variant: 'default' });
         if (onUpload) onUpload(filePath);
       }
@@ -88,12 +89,11 @@ export default function FileUploader({ imageUrl, folder, onUpload }: FileUploade
       <Card>
         <CardContent className="p-4 space-y-2">
           <div
-            className="border-2 border-dashed border-gray-200 rounded-lg flex flex-col gap-1 p-6 items-center cursor-pointer"
+            className="border-2 border-dashed border-gray-200 rounded-lg flex flex-col gap-1 p-4 items-center cursor-pointer"
             onClick={() => inputRef.current?.click()}
           >
-            <FileIcon className="w-12 h-12" />
+            <FileIcon className="w-6 h-6" />
             <span className="text-sm font-medium text-gray-500">Upload a logo for the project display</span>
-            <span className="text-xs text-gray-500">PDF, image</span>
           </div>
           <div className="space-y-2 text-sm">
             <Label htmlFor="file" className="text-sm font-medium">Project Logo</Label>
@@ -110,8 +110,8 @@ export default function FileUploader({ imageUrl, folder, onUpload }: FileUploade
           {(previewUrl || uploading) && (
             <>
               {previewUrl && (
-                <p className="text-sm text-muted-foreground">
-                  Uploaded: {previewUrl.split("/").at(-1)}
+                <p className="text-sm  wrap-break-word underline text-blue-600">
+                  <a href={previewUrl} target="_blank" rel="noopener noreferrer" >Uploaded: {previewUrl.split("/").at(-1)?.split('?').at(0)}</a>
                 </p>
               )}
               {uploading && (
@@ -120,7 +120,6 @@ export default function FileUploader({ imageUrl, folder, onUpload }: FileUploade
             </>
           )}
         </CardContent>
-        <CardFooter />
       </Card>
     </div>
   );

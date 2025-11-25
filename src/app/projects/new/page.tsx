@@ -1,6 +1,7 @@
 'use client';
 
-import { useActionState, useEffect, useRef, useState } from 'react';
+import { useRef, useEffect, useState } from 'react';
+import { useActionState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
@@ -54,41 +55,75 @@ export default function ProjectFormPage({
     <div className="max-w-3xl mx-auto px-4 py-10 text-black" ref={topRef}>
       <h1 className="text-3xl font-bold mb-6">Add New Project</h1>
       <form key={formKey} action={formAction} className="space-y-6">
-        <Input
-          name="name"
-          placeholder="Project Name"
-          defaultValue={formState.values?.name}
-          required
-        />
+        
+        {/* Project Name */}
+        <div>
+          <label className="block text-sm font-medium mb-1">Project Name</label>
+          <Input
+            name="name"
+            placeholder="Project Name"
+            defaultValue={formState.values?.name}
+            required
+          />
+        </div>
+
+        {/* Project ID - hidden */}
         {formState.values?.id && (
-  <input type="hidden" name="id" value={formState.values.id} />
-)}
-        <Textarea
-          name="description"
-          placeholder="Project Description"
-          defaultValue={formState.values?.description}
-        />
-        <FileUploader
-          imageUrl={uploadedImageUrl || ''}
-          folder={PROJECT_BUCKET_IMAGE_PATH}
-          onUpload={(url) => setUploadedImageUrl(url)}
-        />
-        <input type="hidden" name="image_url" value={uploadedImageUrl ?? ''} />
-        <Input
-          name="github_url"
-          placeholder="GitHub URL"
-          defaultValue={formState.values?.github_url}
-        />
-        <Input
-          name="website_url"
-          placeholder="Website URL"
-          defaultValue={formState.values?.website_url}
-        />
-        <Input
-          name="category"
-          placeholder="Category"
-          defaultValue={formState.values?.category}
-        />
+          <input type="hidden" name="id" value={formState.values.id} />
+        )}
+
+        {/* Description */}
+        <div>
+          <label className="block text-sm font-medium mb-1">Project Description</label>
+          <Textarea
+            name="description"
+            placeholder="Project Description"
+            defaultValue={formState.values?.description}
+          />
+        </div>
+
+        {/* Image Upload */}
+        <div>
+          <label className="block text-sm font-medium mb-1">Upload Image</label>
+          <FileUploader
+            imageUrl={uploadedImageUrl || ''}
+            folder={PROJECT_BUCKET_IMAGE_PATH}
+            onUpload={(url) => setUploadedImageUrl(url)}
+          />
+          <input type="hidden" name="image_url" value={uploadedImageUrl ?? ''} />
+        </div>
+
+        {/* GitHub URL */}
+        <div>
+          <label className="block text-sm font-medium mb-1">GitHub URL</label>
+          <Input
+            name="github_url"
+            placeholder="GitHub URL"
+            defaultValue={formState.values?.github_url}
+          />
+        </div>
+
+        {/* Website URL */}
+        <div>
+          <label className="block text-sm font-medium mb-1">Website URL</label>
+          <Input
+            name="website_url"
+            placeholder="Website URL"
+            defaultValue={formState.values?.website_url}
+          />
+        </div>
+
+        {/* Category */}
+        <div>
+          <label className="block text-sm font-medium mb-1">Category</label>
+          <Input
+            name="category"
+            placeholder="Category"
+            defaultValue={formState.values?.category}
+          />
+        </div>
+
+        {/* Status */}
         <div>
           <label className="block mb-1 text-sm font-medium">Status</label>
           <select
@@ -103,6 +138,8 @@ export default function ProjectFormPage({
             <option value="archived">Archived</option>
           </select>
         </div>
+
+        {/* Is Public */}
         <div className="flex items-center space-x-2">
           <Checkbox
             id="is_public"
@@ -114,15 +151,22 @@ export default function ProjectFormPage({
           </label>
           <input type="hidden" name="is_public" value={isPublic ? 'true' : 'false'} />
         </div>
-        <SkillsInput
-          name="skills"
-          defaultSkills={
-            Array.isArray(formState.values?.skills) &&
-            typeof formState.values.skills[0] === 'object'
-              ? (formState.values.skills as { id: string; name: string }[])
-              : []
-          }
-        />
+
+        {/* Skills */}
+        <div>
+          <label className="block text-sm font-medium mb-1">Skills</label>
+          <SkillsInput
+            name="skills"
+            defaultSkills={
+              Array.isArray(formState.values?.skills) &&
+              typeof formState.values.skills[0] === 'object'
+                ? (formState.values.skills as { id: string; name: string }[])
+                : []
+            }
+          />
+        </div>
+
+        {/* Submit Button */}
         <Button type="submit">Save Project</Button>
       </form>
     </div>
