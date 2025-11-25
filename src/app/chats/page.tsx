@@ -135,7 +135,7 @@ export default function ChatPage() {
     if (!currentChatRef.current || ChatIds.length === 0) return;
     let sub: RealtimeChannel;
 
-    subscribeToMessages(ChatIds, currentChatRef.current, (msg) => {
+    subscribeToMessages(ChatIds,  currentChatRef.current, (msg) => {
       setChats((prevChats) => {
         const updatedChats = prevChats.map((chat) => {
           if (chat.id !== msg.chat_id) return chat;
