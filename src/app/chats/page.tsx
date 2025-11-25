@@ -132,7 +132,7 @@ export default function ChatPage() {
   };
 
   useEffect(() => {
-    if (!currentChatRef.current ||  ChatIds.length === 0) return;
+    if (!currentChatRef.current ||   ChatIds.length === 0) return;
     let sub: RealtimeChannel;
 
     subscribeToMessages(ChatIds,  currentChatRef.current, (msg) => {
