@@ -31,6 +31,8 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
+  const [chatlistOpen, setChatListOpen] = useState(true);
+  const [requestListOpen, setRequestListOpen] = useState(false);
   const currentChatRef = useRef<string>(currentChat?.id || "");
   const scrollRef = useRef<HTMLDivElement>(null);
   const prevScrollHeightRef = useRef(0);
@@ -216,12 +218,13 @@ export default function ChatPage() {
             <PulseLoader />
           </div>
         ) : (
-          <div className="space-y-4 overflow-y-auto">
-            <Collapsible defaultOpen>
+          <div className="space-y-4 ">
+            <Collapsible open={chatlistOpen} >
               <CollapsibleTrigger asChild>
                 <Button
                   variant="default"
                   className="w-full justify-between text-left font-medium text-sm"
+                  onClick={()=>setChatListOpen(prev=>!prev)}
                 >
                   Requests for Your Postings <IoIosArrowDown />
                 </Button>
@@ -264,11 +267,12 @@ export default function ChatPage() {
             </Collapsible>
 
             {/* My requests */}
-            <Collapsible defaultOpen>
+            <Collapsible open={requestListOpen}>
               <CollapsibleTrigger asChild>
                 <Button
                   variant="default"
                   className="w-full justify-between text-left font-medium text-sm"
+                   onClick={()=>setRequestListOpen((prev)=>!prev)}
                 >
                   Your Requests to Others <IoIosArrowDown />
                 </Button>

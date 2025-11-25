@@ -18,20 +18,17 @@ export default function SkillsInput({
   name?: string;
   defaultSkills?: Skill[];
 }) {
-  console.log("default Skills", defaultSkills)
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<Skill[]>([]);
   const [fieldState, setFieldState] = useState<SkillFieldStateType>({
     selected: defaultSkills,
     error: undefined,
   });
-  console.log("Field State", fieldState);
 
 useEffect(() => {
-  console.log('Default skills updated:', defaultSkills);
   setFieldState((prev) => ({
     ...prev,
-    selected: defaultSkills,
+    selected: defaultSkills ?? [],
   }));
 }, [defaultSkills]);
 
@@ -94,6 +91,7 @@ useEffect(() => {
       ...prev,
       selected: prev.selected.filter((s) => s.id !== id),
     }));
+
 
   return (
     <div>

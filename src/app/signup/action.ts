@@ -42,11 +42,15 @@ export async function submitProfile(
   });
   if (!parsed.success) {
     const zodErrors = formatZodErrors(parsed.error);
+    const parsedSkills: Skill[] = skills && typeof skills[0] === 'string' ? JSON.parse(skills[0]) : [];
+    console.log(raw,'Parsed Skills');
     return {
       errors: zodErrors,
-      values: { ...raw, experience, education, skills },
+      values: { ...raw, experience, education, skills: parsedSkills},
     };
   }
+
+  
 
   const supabase = await createSupabaseServerClient();
 
@@ -57,7 +61,7 @@ export async function submitProfile(
     redirect(`/login?flash=${msg}`);
   }
 
-  // 3) Check if profile exists
+  
   const { data: existingProfile } = await supabase
     .from("profiles")
     .select("id")
@@ -101,23 +105,52 @@ export async function submitProfile(
     const { error } = await supabase.from("profiles").insert(payload);
     profileError = error;
   }
- console.log("Profile Error:", profileError);
   
 
-  
   const skillLinks = parsedSkills.map((skillId) => ({
     profile_id: record.user.id,
     skill_id: skillId?.id,
   }));
 
-  console.log("Skill Links:", parsedSkills, skillLinks);
+  
 
   const { error: skillUpsertError } = await supabase
     .from('profile_skills')
     .upsert(skillLinks, { onConflict: 'profile_id, skill_id' });
 
-    console.log("Skill Upsert Error:", skillUpsertError);
+    
+    
+  const { data: existingSkills } = await supabase
+    .from("profile_skills")
+    .select("skill_id")
+    .eq("profile_id", record.user.id);
+    
 
+
+
+  
+  const submittedSkillIds = parsedSkills.map((skill) => skill.id);
+  const existingSkillIds = existingSkills?.map((item) => item.skill_id) || [];
+
+  // Find deleted skills by using a set operation (difference between existing and submitted)
+  const deletedSkills = Array.from(existingSkillIds).filter(
+    (skillId) => !submittedSkillIds.includes(skillId)
+  );
+
+  if (deletedSkills.length > 0) {
+    const { error: deleteError } = await supabase
+      .from("profile_skills")
+      .delete()
+      .in("skill_id", deletedSkills)
+      .eq("profile_id", record.user.id);
+
+    if (deleteError) {
+      return {
+        errors: { form: ["Error deleting removed skills."] },
+        values: { ...raw, experience, education, parsedSkills },
+      };
+    }
+  }
   
 
   if (profileError || skillUpsertError) {
@@ -129,4 +162,15 @@ export async function submitProfile(
   }
 
   redirect("/profile");
+}
+
+
+export async function checkUsernameAvailability(username: string): Promise<boolean > {
+  const supabase = await createSupabaseServerClient();
+  const {data: {user}} = await supabase.auth.getUser();
+  const { data } = await supabase.from('profiles').select('id').neq('id', user?.id).eq('username',username).single();
+  if (data && Object.keys(data).length > 0) {
+    return false;
+  }
+   return true;
 }

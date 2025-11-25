@@ -1,5 +1,3 @@
-
-
 "use client";
 import { createContext, useContext, useCallback, useState, ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -7,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 export interface ToastOptions {
   title: string;
   description?: string;
+  formattableDescription?: string;
   variant?: 'default' | 'destructive' | 'success' | 'warning';
 }
 
@@ -33,30 +32,60 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
 
   const toast = useCallback((opts: ToastOptions) => {
     setToasts(prev => [...prev, opts]);
+
     setTimeout(() => {
       setToasts(prev => prev.slice(1));
-    }, 5000);
+    }, 4500);
   }, []);
+
+  const getAccentColor = (variant?: ToastOptions["variant"]) => {
+    switch (variant) {
+      case "destructive":
+        return "bg-red-500";
+      case "success":
+        return "bg-green-500";
+      case "warning":
+        return "bg-yellow-500";
+      default:
+        return "bg-blue-500";
+    }
+  };
 
   return (
     <ToastContext.Provider value={{ toast }}>
       {children}
-      <div className="fixed top-20 inset-x-2 min-w-[20vw] sm:inset-x-auto sm:right-4 flex flex-col space-y-1 z-50">
+
+      <div className="fixed top-20 inset-x-2 sm:right-4 sm:left-auto flex flex-col space-y-3 z-[9999]">
         <AnimatePresence>
           {toasts.map((t, idx) => (
             <motion.div
               key={idx}
-              initial={{ x: 300, opacity: 0 }}
+              initial={{ x: 120, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              exit={{ x: 300, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              exit={{ x: 120, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 260, damping: 25 }}
             >
-              <div className="w-full sm:max-w-xs p-2 sm:p-5 rounded-lg bg-white border border-gray-200">
-                <strong className={`block ${t.variant === 'destructive' ? 'text-red-600' : 'text-black'}`}>
+              <div className="relative w-full sm:w-80 bg-white text-black rounded-xl px-4 py-3 shadow-[0_4px_18px_rgba(0,0,0,0.18)] backdrop-blur-md">
+
+                {/* Left Accent Color Bar */}
+                <div
+                  className={`absolute left-0 top-0 bottom-0 w-1.5 rounded-l-xl ${getAccentColor(
+                    t.variant
+                  )}`}
+                />
+
+                {/* Title */}
+                <strong
+                  className={`block text-sm font-semibold ${
+                    t.variant === "destructive" ? "text-red-600" : "text-gray-900"
+                  }`}
+                >
                   {t.title}
                 </strong>
+
+                {/* Description */}
                 {t.description && (
-                  <p className="mt-1 text-sm leading-tight text-black whitespace-pre-line">
+                  <p className="mt-1 text-sm text-gray-700 whitespace-pre-line">
                     {t.description}
                   </p>
                 )}
