@@ -16,7 +16,7 @@ type Params = {
 }
 
 
-export default async  function ViewProjectPage({params}: {params: Params}){
+export default async  function ViewProjectPage({params}: {params: Promise<Params>}){
     const { id } = await params;
     const project: Project | null = await getProjectById(id, false);
     const signedImageUrl  = await getSignedImageUrl(project?.image_url || '');
