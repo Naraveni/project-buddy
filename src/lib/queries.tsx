@@ -12,21 +12,25 @@ type Tag = Pick<
   'id' | 'name'
 >;
 
-export async function getProjectById(id: string) {
+type Project = Database['public']['Tables']['projects']['Row'] & {
+  skills: { id: string; name: string }[];
+};
+
+export async function getProjectById(id: string, CheckForOwnerShip:boolean = true):Promise<null | Project> {
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { data, error } = await supabase
+  const { data: { user } } = await supabase.auth.getUser();
+
+  let query = supabase
     .from("projects")
     .select("*, skills(id, name)")
-    .eq("id", id)
-    .eq("user_id", user?.id)
-    .single();
+    .eq("id", id);
+  if (CheckForOwnerShip) {
+    query = query.eq("user_id", user?.id);
+  }
 
-  if (error) return null;
-  return data;
-}
+  const { data, error } = await query.single();
+  return error ? null : data;
+  }
 
 export async function getPostingById(id: string) {
   const supabase = await createSupabaseServerClient();

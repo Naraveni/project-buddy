@@ -7,15 +7,17 @@ import { LOGO_NAME, EDIT_ICON } from '@/utils/constants';
 import { FaGithub } from 'react-icons/fa';
 import { FiLink } from 'react-icons/fi';
 import { formatSlugToTitle } from '@/lib/utils';
+import { GrView } from "react-icons/gr";
 
 export default function ProjectsIndexPage({
-  searchParams, projects, errors, count, title = 'My Projects'
+  searchParams, projects, errors, count, title = 'My Projects', isPersonal = true
 }: {
   searchParams: { page?: string; name?: string };
   projects: Project[],
   errors:  Record<string, string[]> | undefined;
   count: number,
   title?: string
+  isPersonal?: boolean
 }) {
 
   const page = Math.max(1, parseInt(searchParams.page ?? '1', 10));
@@ -24,8 +26,8 @@ export default function ProjectsIndexPage({
   const totalPages = Math.ceil(count / perPage);
 
   return (
-    <main className="max-w-4xl mx-auto px-4 py-8 space-y-6">
-      <h1 className="text-3xl font-bold mb-2 text-black">{title}</h1>
+    <main className="max-w-4xl mx-auto px-4 py-8 space-y-6 mt-8">
+      <h1 className="text-3xl font-bold mb-2 text-black ">{title}</h1>
 
       {/* 🔍 Search by name */}
       <form method="get" className="mb-6">
@@ -49,10 +51,13 @@ export default function ProjectsIndexPage({
         </div>
       )}
 
-      {/* ❌ No Projects */}
       {!errors && projects.length === 0 && (
-        <p className="text-gray-400">You haven’t added any projects yet.</p>
-      )}
+  isPersonal ? (
+    <p className="text-gray-400">You haven’t added any projects yet.</p>
+  ) : (
+    <p className="text-gray-400">No community projects found.</p>
+  )
+)}
 
       {/* ✅ Project Cards */}
       <div className="space-y-6">
@@ -105,10 +110,19 @@ export default function ProjectsIndexPage({
               </div>
             </div>
 
-            {/* Main content */}
             <CardContent className="flex-1 p-0 flex flex-col min-w-0">
-              {/* Title */}
               <div>
+                { !isPersonal ? 
+                <div className="flex flex-row gap-2 ">
+                <span className="font-2xl font-semibold">{project.name}</span>
+
+                <div className="ml-auto">
+                  <Link href={`${project.id}`} className="flex items-center gap-1 text-blue-600 ">
+                  <span>View</span>
+                  < GrView/>
+                  </Link>
+                </div>
+                </div> :
                 <Link
                   href={`/projects/${project.id}/edit`}
                   className="text-xl font-semibold hover:underline block"
@@ -122,6 +136,7 @@ export default function ProjectsIndexPage({
                     className="inline-block ml-2 align-text-bottom"
                   />
                 </Link>
+}
               </div>
 
               {/* Description */}

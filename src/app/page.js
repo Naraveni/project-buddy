@@ -4,7 +4,7 @@ import Image from "next/image";
 import collabImage from "@/../public/LandingPage/Collab.png";
 import blogImage from "@/../public/LandingPage/Blog.svg";
 import Link from "next/link";
-import { CodeIcon, StarIcon, MessageSquareIcon, PenIcon, UsersIcon, X } from "lucide-react";
+import { CodeIcon, StarIcon, MessageSquareIcon, PenIcon, UsersIcon } from "lucide-react";
 import { LANDING_PAGE_TEXT } from "@/utils/text";
 import { motion } from "framer-motion";
 

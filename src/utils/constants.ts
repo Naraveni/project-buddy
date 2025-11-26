@@ -1,5 +1,5 @@
 
-import { ProjectStatus } from "@/lib/types";
+
 
 type providerType = { id: string, name: string }[]
 export const AUTH_PROVIDERS: providerType = [

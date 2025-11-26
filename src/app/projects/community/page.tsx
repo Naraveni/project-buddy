@@ -13,6 +13,6 @@ export default async function CommunityProjectPage({
   const { projects, errors, count } = await getProjects(page, perPage, searchName, true);
 
   return (
-    <ProjectsIndexPage searchParams={searchParamsResolved} projects={projects} errors={errors} count={count} title={'Community Projects'} />
+    <ProjectsIndexPage searchParams={searchParamsResolved} projects={projects} errors={errors} count={count} title={'Community Projects'} isPersonal={false} />
   );
 }
