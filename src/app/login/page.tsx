@@ -10,6 +10,7 @@ import { useToast } from "@/components/useToast";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+
 const supabaseClient = createClient();
 const OAUTH_REDIRECT_URI = process.env.NEXT_PUBLIC_OAUTH_REDIRECT_URI || "";
 

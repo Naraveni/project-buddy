@@ -52,8 +52,6 @@ export default function PostingsFilter({
       </Select>
     </div>
 }
-
-    {/* Mode */}
     <div className="flex flex-col gap-1">
       <Label htmlFor="mode">Type</Label>
       <Select name="mode" defaultValue={currentValues.mode ?? "all"}>

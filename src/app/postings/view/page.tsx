@@ -1,26 +1,14 @@
-"use server";
-
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import { formatSlugToTitle } from "@/lib/utils";
 import PostingsFilter from "@/components/postings/filter";
 import { getUserPostings } from "./action";
-import {  getUser } from "@/lib/queries";
+import { getUser } from "@/lib/queries";
 import ChatFormClient from "@/components/postings/chatForm";
 import { MdEdit } from "react-icons/md";
 import { GrView } from "react-icons/gr";
-
-import {
-  CalendarDays,
-  CalendarCheck,
-  Briefcase,
-  Hourglass,
-  Tag,
-  Building,
-} from "lucide-react";
-
-
+import { CalendarDays, CalendarCheck, Briefcase, Hourglass, Tag, Building } from "lucide-react";
 
 export default async function MyPostingsPage({
   searchParams,
@@ -55,8 +43,9 @@ export default async function MyPostingsPage({
   const user = await getUser();
 
   return (
-    <main className="w-full h-[calc(100vh-3rem)] grid lg:grid-cols-[20%_1fr] pt-2">
-      <div className="px-4 border-r border-gray-300 overflow-y-auto">
+    <main className="w-full h-[calc(100vh-3rem)] grid lg:grid-cols-[20%_1fr] pt-2 mt-10 bg-gray-50">
+      {/* Sidebar */}
+      <div className="px-4 border-r border-gray-300 overflow-y-auto bg-white shadow-sm rounded-lg">
         <PostingsFilter
           currentValues={{
             project_id: project_id,
@@ -69,12 +58,14 @@ export default async function MyPostingsPage({
         />
       </div>
 
+      {/* Postings List */}
       <div className="px-6 py-6 space-y-6 overflow-y-auto h-full">
-        <h1 className="text-3xl font-bold text-black">
+        <h1 className="text-3xl font-bold text-black mb-4">
           {view_mode === "my_postings" ? "My Postings" : "Community Postings"}
         </h1>
-        {error_messages && error_messages.length > 0 && (
-          <p className="text-xs text-red-500">{error_messages.join(" ,")}</p>
+
+        {error_messages.length > 0 && (
+          <p className="text-xs text-red-500">{error_messages.join(", ")}</p>
         )}
 
         {postings.length === 0 && (
@@ -84,21 +75,19 @@ export default async function MyPostingsPage({
         {postings.map((posting) => (
           <Card
             key={posting.id}
-            className={`p-4 rounded-2xl transition shadow-sm hover:shadow-2xl relative ${
+            className={`p-6 rounded-3xl transition-shadow shadow-lg hover:shadow-2xl relative ${
               posting.status === "paused"
-                ? "bg-neutral-100"
+                ? "bg-yellow-50"
                 : posting.status === "closed"
-                ? "bg-red-100 text-black"
+                ? "bg-red-50 text-black"
                 : "bg-white"
             }`}
           >
             <CardContent className="flex flex-col gap-4">
-              <div className="flex items-center gap-2">
-                <Briefcase className="h-4 w-4 text-gray-500" />
-                <span className="text-xl font-semibold block">
-                  {posting.role_name}
-                </span>
-
+              {/* Role and Status */}
+              <div className="flex items-center gap-4">
+                <Briefcase className="h-5 w-5 text-gray-500" />
+                <span className="text-2xl font-semibold">{posting.role_name}</span>
                 <Badge
                   variant="outline"
                   className={`text-xs capitalize flex items-center gap-1 ${
@@ -111,40 +100,35 @@ export default async function MyPostingsPage({
                 >
                   <Tag className="w-3 h-3" />
                   {posting.status}
-                  
                 </Badge>
-                
-                <div className="flex items-center gap-4 ml-auto">
+                <div className="flex items-center ml-auto gap-4">
                   <Link href={`/postings/${posting.id}/view`}>
-    <GrView className="w-5 h-5 text-gray-500 hover:text-black" />
-  </Link>
-   
-  {posting.status === "open" && posting.user_id !== user?.id && (
-    <ChatFormClient postingId={posting.id} />
-  )}
-  
-  {view_mode !== "community_postings" && posting.user_id === user?.id && (
-    <Link href={`/postings/${posting.id}/edit`}>
-      <MdEdit className="w-5 h-5 text-gray-500 hover:text-black" />
-    </Link>
-  )}
+                    <GrView className="w-6 h-6 text-gray-500 hover:text-black" />
+                  </Link>
 
-</div>
+                  {posting.status === "open" && posting.user_id !== user?.id && (
+                    <ChatFormClient postingId={posting.id} />
+                  )}
 
-
+                  {view_mode !== "community_postings" && posting.user_id === user?.id && (
+                    <Link href={`/postings/${posting.id}/edit`}>
+                      <MdEdit className="w-6 h-6 text-gray-500 hover:text-black" />
+                    </Link>
+                  )}
+                </div>
               </div>
 
               {/* Description */}
-              <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3">
+              <p className="text-sm text-gray-700 leading-relaxed line-clamp-3">
                 {posting.description}
               </p>
 
               {/* Skills */}
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 mt-2">
                 {posting.skills.map((skill) => (
                   <Badge
                     key={skill.id}
-                    className="text-xs px-2 py-1 rounded-full bg-opacity-90"
+                    className="text-xs px-3 py-1 rounded-full bg-opacity-90"
                     style={{ backgroundColor: stringToColor(skill.name) }}
                   >
                     {formatSlugToTitle(skill.name)}
@@ -175,7 +159,7 @@ export default async function MyPostingsPage({
               </div>
 
               {/* Hours */}
-              <div className="text-sm font-medium mt-1 flex items-center gap-1">
+              <div className="text-sm font-medium mt-2 flex items-center gap-1">
                 <Hourglass className="w-4 h-4 text-gray-500" />
                 Weekly Hours Required: {posting.hours_required}
               </div>
@@ -188,7 +172,7 @@ export default async function MyPostingsPage({
           {curPage > 1 ? (
             <Link
               href={`?page=${curPage - 1}`}
-              className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+              className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition"
             >
               Previous
             </Link>
@@ -197,13 +181,13 @@ export default async function MyPostingsPage({
           )}
 
           <span className="text-gray-700">
-            Page {page} of {totalPages || 1}
+            Page {curPage} of {totalPages || 1}
           </span>
 
           {curPage < totalPages ? (
             <Link
               href={`?page=${curPage + 1}`}
-              className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+              className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition"
             >
               Next
             </Link>
